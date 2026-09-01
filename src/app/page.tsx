@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowRight, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Coffee, Dog, Download, FileText, LogIn, LogOut, MoreHorizontal, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Trash2, TreePalm, Upload, Users, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Coffee, Dog, Download, FileText, LogIn, LogOut, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Trash2, TreePalm, Upload, Users, X } from "lucide-react";
 
 type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
 type Attachment = { id: string; name: string; type: string; size: number; data?: string };
@@ -10,14 +10,11 @@ type Booking = { id: string; cabinId: string; guestName: string; people: number;
 type Draft = Omit<Booking, "id" | "createdAt"> & { id?: string };
 
 const initialCabins: Cabin[] = [{ id: "c1", name: "Chalé 01", tone: "emerald" }, { id: "c2", name: "Chalé 02", tone: "amber" }];
-const initialBookings: Booking[] = [
-  { id: "r1", cabinId: "c1", guestName: "Mariana & Lucas", people: 2, start: "2026-09-03", end: "2026-09-06", checkIn: "14:00", checkOut: "11:00", pets: true, breakfast: true, intolerance: "", decoration: true, notes: "Aniversário de namoro. Preparar decoração no quarto.", documents: [], status: "Reservado", createdAt: "2026-08-15" },
-  { id: "r2", cabinId: "c2", guestName: "Família Ribeiro", people: 4, start: "2026-09-05", end: "2026-09-09", checkIn: "15:00", checkOut: "11:00", pets: false, breakfast: true, intolerance: "Intolerância à lactose", decoration: false, notes: "Solicitou berço para criança.", documents: [], status: "Check-in realizado", createdAt: "2026-08-18" },
-  { id: "r3", cabinId: "c1", guestName: "Helena Duarte", people: 2, start: "2026-09-12", end: "2026-09-14", checkIn: "14:00", checkOut: "11:00", pets: false, breakfast: false, intolerance: "", decoration: false, notes: "", documents: [], status: "Reservado", createdAt: "2026-08-25" },
-];
+const initialBookings: Booking[] = [];
 const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const weekdays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const storeKey = "refugio-gestao-operacao-v1";
+const legacyStoreKeys = ["refugio-gestao-operacao-v1", "refugio-gestao-operacao-v2"];
+const storeKey = "refugio-gestao-operacao-v3";
 
 const toISO = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const fromISO = (value: string) => { const [year, month, day] = value.split("-").map(Number); return new Date(year, month - 1, day); };
@@ -33,9 +30,9 @@ function dotClass(tone: Cabin["tone"]) { return tone === "amber" ? "bg-[#c89e66]
 export default function Home() {
   const [cabins, setCabins] = useState<Cabin[]>(initialCabins);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
-  const [view, setView] = useState(new Date(2026, 8, 1));
-  const [selectedDay, setSelectedDay] = useState("2026-09-05");
-  const [selectedId, setSelectedId] = useState("r2");
+  const [view, setView] = useState(() => new Date());
+  const [selectedDay, setSelectedDay] = useState(() => toISO(new Date()));
+  const [selectedId, setSelectedId] = useState("");
   const [filter, setFilter] = useState("all");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -44,7 +41,7 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => { try { const saved = localStorage.getItem(storeKey); if (saved) { const data = JSON.parse(saved); if (Array.isArray(data.cabins) && Array.isArray(data.bookings)) { setCabins(data.cabins); setBookings(data.bookings); } } } catch {} finally { setHydrated(true); } }, []);
+  useEffect(() => { try { legacyStoreKeys.forEach((key) => localStorage.removeItem(key)); const saved = localStorage.getItem(storeKey); if (saved) { const data = JSON.parse(saved); if (Array.isArray(data.cabins) && Array.isArray(data.bookings)) { setCabins(data.cabins); setBookings(data.bookings); } } } catch {} finally { setHydrated(true); } }, []);
   useEffect(() => { if (hydrated) localStorage.setItem(storeKey, JSON.stringify({ cabins, bookings })); }, [cabins, bookings, hydrated]);
   useEffect(() => { if (!notice) return; const timer = window.setTimeout(() => setNotice(""), 3000); return () => window.clearTimeout(timer); }, [notice]);
 
