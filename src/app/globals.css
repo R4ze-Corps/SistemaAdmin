@@ -1,3 +1,86 @@
 @import "tailwindcss";
 :root { --background: #f4f3ed; --foreground: #22322b; }
 body { background: var(--background); color: var(--foreground); }
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; --background: #0c1310; --foreground: #e9f1ec; }
+body, button, input, select, textarea { transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+
+html.dark [class~="bg-[#fffefa]"],
+html.dark [class~="bg-[#fdfdf9]"],
+html.dark [class~="bg-[#fdfcf8]"] { background-color: #0f1814 !important; }
+html.dark .bg-white { background-color: #16221c !important; }
+html.dark [class~="bg-[#f4f3ed]"],
+html.dark [class~="bg-[#eeeee8]"],
+html.dark [class~="bg-[#ecece6]"],
+html.dark [class~="bg-[#f7f7f3]"],
+html.dark [class~="bg-[#f1f1eb]"],
+html.dark [class~="bg-[#f1f3ef]"],
+html.dark [class~="bg-[#f2f6f3]"],
+html.dark [class~="bg-[#fbfdfb]"],
+html.dark [class~="bg-[#fbf9f4]"] { background-color: #1b2922 !important; }
+
+html.dark [class~="bg-[#edf3ee]"],
+html.dark [class~="bg-[#e7f0e9]"],
+html.dark [class~="bg-[#e5efe9]"],
+html.dark [class~="bg-[#e5f2e9]"],
+html.dark [class~="bg-[#eaf5ed]"],
+html.dark [class~="bg-[#f0f7f2]"],
+html.dark [class~="bg-[#deeee4]"] { background-color: #193527 !important; }
+html.dark [class~="bg-[#f3e9da]"] { background-color: #382d1e !important; }
+html.dark [class~="bg-[#ece8f6]"] { background-color: #2d2740 !important; }
+html.dark [class~="bg-[#f7e5df]"],
+html.dark [class~="bg-[#f9e8e4]"],
+html.dark [class~="bg-[#fff0ed]"],
+html.dark [class~="bg-[#fff1ee]"],
+html.dark [class~="bg-[#fff7f5]"] { background-color: #3a2420 !important; }
+
+html.dark [class~="text-[#22322b]"] { color: #edf5f0 !important; }
+html.dark [class~="text-[#46544b]"],
+html.dark [class~="text-[#536158]"],
+html.dark [class~="text-[#58645d]"],
+html.dark [class~="text-[#59655e]"],
+html.dark [class~="text-[#5e6962]"],
+html.dark [class~="text-[#68736c]"],
+html.dark [class~="text-[#69736d]"],
+html.dark [class~="text-[#6d7770]"],
+html.dark [class~="text-[#6f7972]"],
+html.dark [class~="text-[#758078]"],
+html.dark [class~="text-[#768078]"],
+html.dark [class~="text-[#778078]"],
+html.dark [class~="text-[#7a837c]"],
+html.dark [class~="text-[#7c867f]"],
+html.dark [class~="text-[#7d877f]"],
+html.dark [class~="text-[#829087]"],
+html.dark [class~="text-[#879088]"],
+html.dark [class~="text-[#8a928b]"] { color: #a8b8ae !important; }
+html.dark [class~="text-[#1f4b3a]"],
+html.dark [class~="text-[#347053]"],
+html.dark [class~="text-[#367254]"] { color: #82c69e !important; }
+html.dark [class~="text-[#906a36]"] { color: #dfb978 !important; }
+html.dark [class~="text-[#665297]"] { color: #bca9ec !important; }
+html.dark [class~="text-[#995545]"],
+html.dark [class~="text-[#a65746]"] { color: #ef9b88 !important; }
+
+html.dark [class*="border-[#e4e3dc]"],
+html.dark [class*="border-[#e8e7df]"],
+html.dark [class*="border-[#ebeae3]"],
+html.dark [class*="border-[#dcded8]"],
+html.dark [class*="border-[#d7d9d3]"],
+html.dark [class*="border-[#d2d8d1]"] { border-color: #314239 !important; }
+html.dark [class*="border-[#b7ccbc]"],
+html.dark [class*="border-[#b9cec0]"],
+html.dark [class*="border-[#b9d5c2]"],
+html.dark [class*="border-[#c7ded0]"],
+html.dark [class*="border-[#c9dfd0]"],
+html.dark [class*="border-[#a9ceb6]"] { border-color: #38604b !important; }
+html.dark [class*="border-[#e5d1af]"] { border-color: #665236 !important; }
+html.dark [class*="border-[#d9cff0]"] { border-color: #554870 !important; }
+html.dark [class*="border-[#edcdc4]"],
+html.dark [class*="border-[#edc7bd]"],
+html.dark [class*="border-[#f0d6cf]"] { border-color: #70463d !important; }
+
+html.dark input, html.dark select, html.dark textarea { background-color: #111c17 !important; color: #e9f1ec !important; border-color: #34463c !important; }
+html.dark input::placeholder, html.dark textarea::placeholder { color: #718078; }
+html.dark option { background-color: #111c17; color: #e9f1ec; }
+html.dark .shadow-xl, html.dark .shadow-2xl { box-shadow: 0 24px 60px rgba(0,0,0,.48) !important; }
