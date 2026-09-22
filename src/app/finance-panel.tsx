@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import PayablesPanel, { type Payable } from "./payables-panel";
 import { ArrowDownLeft, ArrowUpRight, Banknote, CalendarDays, Pencil, Plus, ReceiptText, Save, Trash2, WalletCards, X } from "lucide-react";
 
 export type FinanceKind = "entrada" | "saida";
@@ -15,8 +16,9 @@ const currentMonth = () => new Date().toISOString().slice(0, 7);
 const money = (value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const emptyDraft = (): FinanceDraft => ({ kind: "entrada", description: "", amount: 0, date: today(), method: "PIX", category: "Hospedagem", notes: "" });
 
-export default function FinancePanel({ entries, onChange, onNotice }: { entries: FinanceEntry[]; onChange: (entries: FinanceEntry[]) => void; onNotice: (message: string) => void }) {
+export default function FinancePanel({ entries, onChange, payables, onPayablesChange, onNotice }: { entries: FinanceEntry[]; onChange: (entries: FinanceEntry[]) => void; payables: Payable[]; onPayablesChange: (items: Payable[]) => void; onNotice: (message: string) => void }) {
   const [draft, setDraft] = useState<FinanceDraft | null>(null);
+  const [section, setSection] = useState<"transactions" | "payables">("transactions");
   const [methodFilter, setMethodFilter] = useState<"Todos" | PaymentMethod>("Todos");
   const [month, setMonth] = useState(currentMonth());
 
@@ -44,9 +46,10 @@ export default function FinancePanel({ entries, onChange, onNotice }: { entries:
   };
 
   return <section className="p-5 md:p-8">
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><p className="text-[9px] font-bold tracking-[.14em] text-[#758078]">CONTROLE FINANCEIRO</p><h2 className="mt-1 text-2xl font-bold tracking-[-.055em] md:text-[28px]">Entradas e saídas</h2><p className="mt-2 text-xs text-[#758078]">Registre tudo que entrou ou saiu e acompanhe o saldo automaticamente.</p></div><button onClick={() => setDraft(emptyDraft())} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1f4b3a] px-4 text-xs font-bold text-white"><Plus size={16} /> Novo lançamento</button></div>
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><p className="text-[9px] font-bold tracking-[.14em] text-[#758078]">CONTROLE FINANCEIRO</p><h2 className="mt-1 text-2xl font-bold tracking-[-.055em] md:text-[28px]">{section === "transactions" ? "Entradas e saídas" : "Contas a pagar"}</h2><p className="mt-2 text-xs text-[#758078]">{section === "transactions" ? "Registre tudo que entrou ou saiu e acompanhe o saldo automaticamente." : "Acompanhe produtos, serviços, parcelas e datas de vencimento."}</p></div>{section === "transactions" && <button onClick={() => setDraft(emptyDraft())} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1f4b3a] px-4 text-xs font-bold text-white"><Plus size={16} /> Novo lançamento</button>}</div>
+    <div className="mt-6 inline-flex rounded-xl bg-[#eeeee8] p-1"><button onClick={() => setSection("transactions")} className={`rounded-lg px-4 py-2 text-[10px] font-bold ${section === "transactions" ? "bg-white text-[#1f4b3a] shadow-sm" : "text-[#68736c]"}`}>Movimentações</button><button onClick={() => setSection("payables")} className={`rounded-lg px-4 py-2 text-[10px] font-bold ${section === "payables" ? "bg-white text-[#1f4b3a] shadow-sm" : "text-[#68736c]"}`}>Contas a pagar</button></div>
 
-    <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    {section === "transactions" ? <><div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <FinanceMetric label="Saldo total" value={money(balance)} note="entradas menos saídas" icon={<WalletCards size={18} />} tone={balance < 0 ? "red" : "green"} />
       <FinanceMetric label="Entradas totais" value={money(totalIn)} note="todo o período" icon={<ArrowUpRight size={18} />} tone="green" />
       <FinanceMetric label="Entradas no mês" value={money(monthIn)} note={month.split("-").reverse().join("/")} icon={<Banknote size={18} />} tone="green" />
@@ -56,7 +59,7 @@ export default function FinancePanel({ entries, onChange, onNotice }: { entries:
     <div className="mt-7 rounded-2xl border border-[#e4e3dc] bg-white p-4 md:p-5"><div className="flex flex-col justify-between gap-3 md:flex-row md:items-center"><div><h3 className="text-sm font-bold">Movimentações</h3><p className="mt-1 text-[10px] text-[#758078]">Cartões, contas, cheques e demais formas de pagamento.</p></div><label className="flex items-center gap-2 rounded-xl border border-[#e4e3dc] bg-[#fffefa] px-3 py-2 text-[10px] font-bold text-[#59655e]"><CalendarDays size={14} /><input type="month" value={month} onChange={(event) => setMonth(event.target.value)} className="bg-transparent text-xs outline-none" /></label></div>
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">{(["Todos", ...methods] as const).map((method) => <button key={method} onClick={() => setMethodFilter(method)} className={`whitespace-nowrap rounded-lg px-3 py-2 text-[10px] font-bold ${methodFilter === method ? "bg-[#1f4b3a] text-white" : "bg-[#f1f1eb] text-[#68736c]"}`}>{method}</button>)}</div>
       {visible.length ? <div className="mt-4 grid gap-2">{visible.map((entry) => <article key={entry.id} className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-[#ebeae3] p-3"><span className={`grid h-10 w-10 place-items-center rounded-xl ${entry.kind === "entrada" ? "bg-[#e5f2e9] text-[#347053]" : "bg-[#f9e8e4] text-[#a65746]"}`}>{entry.kind === "entrada" ? <ArrowUpRight size={17} /> : <ArrowDownLeft size={17} />}</span><div className="min-w-0"><b className="block truncate text-xs">{entry.description}</b><span className="mt-1 block truncate text-[9px] text-[#758078]">{new Date(`${entry.date}T12:00:00`).toLocaleDateString("pt-BR")} · {entry.method} · {entry.category}{entry.notes ? ` · ${entry.notes}` : ""}</span></div><div className="flex items-center gap-2"><b className={`whitespace-nowrap text-xs ${entry.kind === "entrada" ? "text-[#347053]" : "text-[#a65746]"}`}>{entry.kind === "entrada" ? "+" : "−"} {money(entry.amount)}</b><button onClick={() => setDraft({ ...entry })} className="grid h-8 w-8 place-items-center rounded-lg bg-[#f1f3ef] text-[#536158]" aria-label="Editar lançamento"><Pencil size={13} /></button><button onClick={() => remove(entry.id)} className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff1ee] text-[#a65746]" aria-label="Excluir lançamento"><Trash2 size={13} /></button></div></article>)}</div> : <div className="mt-4 grid min-h-48 place-items-center rounded-xl border border-dashed border-[#d7d9d3] bg-[#fdfdf9] p-6 text-center"><div><ReceiptText size={24} className="mx-auto text-[#829087]" /><b className="mt-3 block text-xs">Nenhum lançamento encontrado</b><p className="mt-1 text-[10px] text-[#7c867f]">Adicione uma entrada ou saída para este período.</p></div></div>}
-    </div>
+    </div></> : <PayablesPanel items={payables} onChange={onPayablesChange} onNotice={onNotice} />}
 
     {draft && <FinanceModal draft={draft} setDraft={setDraft} onSave={save} onClose={() => setDraft(null)} />}
   </section>;

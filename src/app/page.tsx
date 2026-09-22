@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import FinancePanel, { type FinanceEntry } from "./finance-panel";
+import { type Payable } from "./payables-panel";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Coffee, Dog, Download, FileText, LayoutDashboard, LogIn, Moon, LogOut, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, X } from "lucide-react";
 
 type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
@@ -31,6 +32,7 @@ export default function Home() {
   const [cabins, setCabins] = useState<Cabin[]>(initialCabins);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [financeEntries, setFinanceEntries] = useState<FinanceEntry[]>([]);
+  const [payables, setPayables] = useState<Payable[]>([]);
   const [activeView, setActiveView] = useState<"overview" | "finance">("overview");
   const [darkMode, setDarkMode] = useState(false);
   const [view, setView] = useState(() => new Date());
@@ -63,6 +65,7 @@ export default function Home() {
         setCabins(Array.isArray(data.cabins) ? data.cabins : initialCabins);
         setBookings(Array.isArray(data.bookings) ? data.bookings : initialBookings);
         setFinanceEntries(Array.isArray(data.financeEntries) ? data.financeEntries : []);
+        setPayables(Array.isArray(data.payables) ? data.payables : []);
       })
       .catch(() => setNotice("Não foi possível carregar os dados do MongoDB."))
       .finally(() => setHydrated(true));
@@ -70,11 +73,11 @@ export default function Home() {
   useEffect(() => {
     if (!hydrated) return;
     const timer = window.setTimeout(async () => {
-      const response = await fetch("/api/state", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cabins, bookings, financeEntries }) });
+      const response = await fetch("/api/state", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cabins, bookings, financeEntries, payables }) });
       if (!response.ok) setNotice("Não foi possível salvar as alterações no MongoDB.");
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [cabins, bookings, financeEntries, hydrated]);
+  }, [cabins, bookings, financeEntries, payables, hydrated]);
   useEffect(() => { if (!notice) return; const timer = window.setTimeout(() => setNotice(""), 3000); return () => window.clearTimeout(timer); }, [notice]);
 
   const days = useMemo(() => { const first = new Date(view.getFullYear(), view.getMonth(), 1); const start = new Date(first); start.setDate(first.getDate() - first.getDay()); return Array.from({ length: 42 }, (_, index) => { const date = new Date(start); date.setDate(start.getDate() + index); return date; }); }, [view]);
@@ -133,7 +136,7 @@ export default function Home() {
     </section>
     <aside className="border-t border-[#e4e3dc] bg-[#fdfcf8] p-5 lg:border-l lg:border-t-0 md:p-8"><div className="flex items-start justify-between"><div><p className="text-[9px] font-bold tracking-[.14em] text-[#758078]">DIA SELECIONADO</p><h2 className="mt-1 text-[21px] font-bold capitalize tracking-[-.05em]">{fromISO(selectedDay).toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}</h2></div><button onClick={() => openNew(selectedDay)} className="grid h-9 w-9 place-items-center rounded-lg border border-[#e4e3dc] bg-white text-[#1f4b3a]" aria-label="Reservar esta data"><Plus size={17} /></button></div><p className="mt-3 text-[11px] text-[#7a837c]">{selectedBookings.length ? `${selectedBookings.length} reserva(s) ocupando esta data.` : "Data livre. Você pode criar uma reserva para este dia."}</p><div className="mt-5 grid gap-2">{selectedBookings.map((booking) => { const cabin = cabins.find((item) => item.id === booking.cabinId); return <button onClick={() => { setSelectedId(booking.id); setDetailsOpen(true); }} key={booking.id} className="grid grid-cols-[38px_1fr_auto] items-center gap-2.5 rounded-xl border border-[#c7ded0] bg-[#f0f7f2] p-2.5 text-left"><span className={`grid h-[38px] w-[38px] place-items-center rounded-xl text-[10px] font-bold ${cabin ? toneClasses(cabin.tone) : ""}`}>{booking.guestName.split(" ").map((name) => name[0]).slice(0, 2).join("")}</span><span><b className="block text-[12px]">{booking.guestName}</b><small className="mt-1 block text-[10px] text-[#778078]">{cabin?.name} · {booking.people} pessoas</small></span><span className="rounded-full bg-[#deeee4] px-2 py-1 text-[8px] font-bold text-[#367254]">{booking.status}</span></button>; })}</div>{!selectedBookings.length && <button onClick={() => openNew(selectedDay)} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#b7ccbc] bg-white py-4 text-xs font-bold text-[#1f4b3a]"><Plus size={15} /> Reservar esta data</button>}
       {selected && <section className="mt-5 rounded-2xl border border-[#e4e3dc] bg-white p-4"><div className="flex items-center justify-between"><div><p className="text-[8px] font-bold tracking-[.13em] text-[#758078]">RESERVA SELECIONADA</p><h3 className="mt-1 text-sm font-bold">{selected.guestName}</h3></div><button onClick={() => openEdit(selected)} className="grid h-8 w-8 place-items-center rounded-lg bg-[#edf3ee] text-[#1f4b3a]" aria-label="Editar reserva"><Pencil size={13} /></button></div><div className="mt-4 grid grid-cols-2 gap-3 text-[10px]"><Detail label="Entrada" value={`${shortDate(selected.start)} · ${selected.checkIn}`} /><Detail label="Saída" value={`${shortDate(selected.end)} · ${selected.checkOut}`} /><Detail label="Pessoas" value={`${selected.people} hóspedes`} /><Detail label="Documentos" value={`${selected.documents.length} anexo(s)`} /></div><button onClick={() => setDetailsOpen(true)} className="mt-4 flex w-full items-center justify-between border-t border-[#e4e3dc] pt-3 text-[10px] font-bold text-[#1f4b3a]">Abrir detalhes da reserva <ArrowRight size={14} /></button></section>}</aside>
-    </div> : <FinancePanel entries={financeEntries} onChange={setFinanceEntries} onNotice={setNotice} />}
+    </div> : <FinancePanel entries={financeEntries} onChange={setFinanceEntries} payables={payables} onPayablesChange={setPayables} onNotice={setNotice} />}
   </section>
   {draft && <BookingModal draft={draft} cabins={cabins} setDraft={setDraft} onClose={() => setDraft(null)} onSave={saveDraft} onUpload={uploadDocuments} onRemoveDocument={removeDocument} uploadProgress={uploadProgress} />}
   {detailsOpen && selected && <BookingDetails booking={selected} cabin={cabins.find((item) => item.id === selected.cabinId)} onClose={() => setDetailsOpen(false)} onEdit={() => { setDetailsOpen(false); openEdit(selected); }} onDelete={() => removeBooking(selected.id)} onStatus={updateStatus} />}
