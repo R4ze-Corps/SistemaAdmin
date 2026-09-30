@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import FinancePanel, { type FinanceEntry } from "./finance-panel";
 import { type Payable } from "./payables-panel";
+import AuthGate from "./auth-gate";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Coffee, Dog, Download, FileText, LayoutDashboard, LogIn, Moon, LogOut, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, X } from "lucide-react";
 
 type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
@@ -29,6 +30,10 @@ function toneClasses(tone: Cabin["tone"]) { return tone === "amber" ? "bg-[#f3e9
 function dotClass(tone: Cabin["tone"]) { return tone === "amber" ? "bg-[#c89e66]" : tone === "violet" ? "bg-[#8877bb]" : tone === "rose" ? "bg-[#c47b68]" : "bg-[#68a07d]"; }
 
 export default function Home() {
+  return <AuthGate><Dashboard /></AuthGate>;
+}
+
+function Dashboard() {
   const [cabins, setCabins] = useState<Cabin[]>(initialCabins);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [financeEntries, setFinanceEntries] = useState<FinanceEntry[]>([]);
@@ -58,6 +63,7 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/state", { cache: "no-store" })
       .then((response) => {
+        if (response.status === 401) window.dispatchEvent(new Event("auth-expired"));
         if (!response.ok) throw new Error("Não foi possível carregar os dados do MongoDB.");
         return response.json();
       })
@@ -66,15 +72,18 @@ export default function Home() {
         setBookings(Array.isArray(data.bookings) ? data.bookings : initialBookings);
         setFinanceEntries(Array.isArray(data.financeEntries) ? data.financeEntries : []);
         setPayables(Array.isArray(data.payables) ? data.payables : []);
+        setHydrated(true);
       })
-      .catch(() => setNotice("Não foi possível carregar os dados do MongoDB."))
-      .finally(() => setHydrated(true));
+      .catch(() => setNotice("Não foi possível carregar os dados do MongoDB. Recarregue a página para tentar novamente; o salvamento está bloqueado para proteger os dados existentes."));
   }, []);
   useEffect(() => {
     if (!hydrated) return;
     const timer = window.setTimeout(async () => {
+      try {
       const response = await fetch("/api/state", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cabins, bookings, financeEntries, payables }) });
+      if (response.status === 401) window.dispatchEvent(new Event("auth-expired"));
       if (!response.ok) setNotice("Não foi possível salvar as alterações no MongoDB.");
+      } catch { setNotice("Falha de conexão ao salvar. Verifique sua conexão."); }
     }, 350);
     return () => window.clearTimeout(timer);
   }, [cabins, bookings, financeEntries, payables, hydrated]);

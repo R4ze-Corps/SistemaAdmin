@@ -1,8 +1,11 @@
 import { get } from "@vercel/blob";
+import { authorize, authFailure } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
+  try {
+  await authorize();
   const url = new URL(request.url);
   const pathname = url.searchParams.get("pathname") ?? "";
   const name = (url.searchParams.get("name") ?? "documento").replace(/[\r\n"]/g, "_");
@@ -10,4 +13,5 @@ export async function GET(request: Request) {
   const result = await get(pathname, { access: "private" });
   if (!result) return Response.json({ message: "Arquivo não encontrado." }, { status: 404 });
   return new Response(result.stream, { headers: { "Content-Type": result.blob.contentType || "application/octet-stream", "Content-Length": String(result.blob.size), "Content-Disposition": `attachment; filename="${name}"`, "Cache-Control": "private, no-store" } });
+  } catch (error) { return authFailure(error); }
 }
