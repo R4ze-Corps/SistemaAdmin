@@ -21,7 +21,10 @@ export async function POST(request: Request, context: Context) {
     const body = await request.json().catch(() => { throw new AuthError("Dados inválidos.", 400); });
     const username = normalizeLogin(body.username);
     const password = typeof body.password === "string" ? body.password : "";
-    if (!validLogin(username) || password.length < 12 || password.length > 128) throw new AuthError("Informe um nome de login de 3 a 50 caracteres (letras, números, espaços, ponto, hífen ou sublinhado) e uma senha de 12 a 128 caracteres.", 400);
+    if (!validLogin(username)) throw new AuthError("Informe um nome de login de 3 a 50 caracteres (letras, números, espaços, ponto, hífen ou sublinhado).", 400);
+    // Existing longer passwords remain valid for login; new passwords use 4–8 characters.
+    const maximumPasswordLength = action === "register" ? 8 : 128;
+    if (password.length < 4 || password.length > maximumPasswordLength) throw new AuthError(action === "register" ? "A senha deve ter de 4 a 8 caracteres." : "Informe sua senha (mínimo de 4 caracteres).", 400);
     await rateLimit(request, username);
     const db = await getDatabase();
     const users = db.collection<Account>("users");

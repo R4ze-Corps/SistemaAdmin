@@ -31,7 +31,9 @@ Os demais cadastros ficam pendentes: o administrador usa **Contas** para aprovar
 Todas as contas aprovadas compartilham o mesmo painel e podem alterar todos os dados.
 Bloquear uma conta invalida suas sessões. A conta administradora não pode ser bloqueada pela interface.
 
-As senhas exigem 12 a 128 caracteres e são armazenadas com scrypt e salt aleatório.
+Novas senhas exigem 4 a 8 caracteres e são armazenadas com scrypt e salt aleatório.
+Senhas antigas mais longas continuam aceitas no login (até 128 caracteres).
+Senhas curtas são menos seguras; a limitação de tentativas e a aprovação de contas permanecem ativas.
 As sessões duram sete dias, usam cookies HttpOnly (Secure em produção) e somente o hash
 do token fica no MongoDB. Login/cadastro têm limitação persistente de tentativas, e
 as operações de escrita verificam a origem. APIs de dados, documentos e tokens de upload

@@ -94,11 +94,17 @@ test("username registration persists account data and login respects approval", 
   };
   const route = load("../src/app/api/auth/[action]/route.ts", {
     "@/lib/mongodb": { getDatabase: async () => ({ collection: () => users }) },
-    "@/lib/auth": { ...auth, rateLimit: async () => {}, hashPassword: async () => "salt:hashed-password", verifyPassword: async (password, hash) => password === "Senha longa 123!" && hash === "salt:hashed-password", createSession: async user => { sessionUser = user; } },
+    "@/lib/auth": { ...auth, rateLimit: async () => {}, hashPassword: async () => "salt:hashed-password", verifyPassword: async (password, hash) => password === "Teste123" && hash === "salt:hashed-password", createSession: async user => { sessionUser = user; } },
   });
   const post = (action, body) => route.POST(new Request(`http://localhost/api/auth/${action}`, { method: "POST", headers: { origin: "http://localhost", "content-type": "application/json" }, body: JSON.stringify(body) }), { params: Promise.resolve({ action }) });
   try {
-    const result = await post("register", { name: "Kawan", username: " KAWAN ", password: "Senha longa 123!" });
+    for (const password of ["", "123", "123456789"]) {
+      assert.equal((await post("register", { name: "Limite", username: "limite", password })).status, 400);
+    }
+    for (const password of ["1234", "12345678"]) {
+      assert.equal((await post("register", { name: "Limite", username: "administrador", password, setupKey: "errada" })).status, 403);
+    }
+    const result = await post("register", { name: "Kawan", username: " KAWAN ", password: "Teste123" });
     assert.equal(result.status, 201);
     assert.equal((await result.json()).pending, true);
     assert.equal(stored[0].username, "kawan");
@@ -107,18 +113,18 @@ test("username registration persists account data and login respects approval", 
     assert.equal("password" in stored[0], false);
     assert.equal("email" in stored[0], false);
     assert.equal(sessionUser, undefined);
-    assert.equal((await post("register", { name: "Outro Kawan", username: "KAWAN", password: "Senha longa 123!" })).status, 409);
-    assert.equal((await post("login", { username: "kawan", password: "Senha longa 123!" })).status, 403);
+    assert.equal((await post("register", { name: "Outro Kawan", username: "KAWAN", password: "Teste123" })).status, 409);
+    assert.equal((await post("login", { username: "kawan", password: "Teste123" })).status, 403);
     stored[0].status = "approved";
-    const login = await post("login", { username: "Kawan", password: "Senha longa 123!" });
+    const login = await post("login", { username: "Kawan", password: "Teste123" });
     assert.equal(login.status, 200);
     const data = await login.json();
     assert.equal(data.user.username, "kawan");
     assert.equal("passwordHash" in data.user, false);
     assert.equal(sessionUser, stored[0]);
     assert.equal((await post("login", { username: "kawan", password: "Senha incorreta longa" })).status, 401);
-    assert.equal((await post("register", { name: "Admin", username: "administrador", password: "Senha longa 123!", setupKey: "errada" })).status, 403);
-    assert.equal((await post("register", { name: "Admin", username: "administrador", password: "Senha longa 123!", setupKey: "s".repeat(32) })).status, 201);
+    assert.equal((await post("register", { name: "Admin", username: "administrador", password: "Teste123", setupKey: "errada" })).status, 403);
+    assert.equal((await post("register", { name: "Admin", username: "administrador", password: "Teste123", setupKey: "s".repeat(32) })).status, 201);
     assert.equal(stored[1].role, "admin");
   } finally {
     if (previousLogin === undefined) delete process.env.ADMIN_LOGIN; else process.env.ADMIN_LOGIN = previousLogin;
