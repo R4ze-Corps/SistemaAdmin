@@ -61,6 +61,17 @@ O tema claro/escuro/automático é salvo na conta no MongoDB; localStorage mant�
 Administradores também acessam aprovação/bloqueio de contas e o gerenciamento de chalés.
 As APIs de configurações exigem sessão aprovada e validam a origem das alterações.
 
+### Modo Beta
+
+Em **Configurações > Modo Beta**, cada conta pode ativar seu ambiente de testes.
+Ele usa `app_state_beta` no MongoDB e `beta/<id-da-conta>/reservas/` no Blob privado.
+Na primeira ativação copia apenas os chalés; reservas, financeiro e documentos começam vazios.
+O tema Beta é separado do normal. Perfil, senha, sessões e permissões reais não podem ser
+alterados no Beta. Desativar restaura o ambiente real e reativar recupera os testes salvos.
+Não existe promoção/mesclagem de dados Beta para produção. Anexos de teste consomem armazenamento.
+Cada requisição informa o ambiente explicitamente: abas antigas são bloqueadas após a troca,
+e os endpoints de arquivos validam o ambiente e o dono da pasta de testes.
+
 ## Banco de dados
 
 Copie `.env.example` para `.env.local` e informe a conexão do MongoDB Atlas:

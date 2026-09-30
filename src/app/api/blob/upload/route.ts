@@ -1,6 +1,7 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { authorize, authFailure } from "@/lib/auth";
+import { assertDocument, workspaceFor } from "@/lib/workspace";
 
 export const runtime = "nodejs";
 
@@ -11,8 +12,9 @@ export async function POST(request: Request) {
       request,
       body,
       onBeforeGenerateToken: async (pathname) => {
-        await authorize(request);
-        if (!pathname.startsWith("reservas/")) throw new Error("Destino de upload inválido.");
+        const user = await authorize(request);
+        const workspace = workspaceFor(user, pathname.startsWith("beta/") ? "beta" : "production");
+        assertDocument(pathname, workspace.documentPrefix);
         return { maximumSizeInBytes: 5_000_000_000_000, addRandomSuffix: true, allowOverwrite: false, validUntil: Date.now() + 15 * 60 * 1000 };
       },
     });

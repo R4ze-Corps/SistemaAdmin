@@ -1,7 +1,8 @@
 "use client";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { Eye, EyeOff, LogOut, Settings, ShieldCheck, TreePalm, Users, X } from "lucide-react";
-import SettingsPanel, { applyTheme, type SettingsUser } from "./settings-panel";
+import SettingsPanel, { applyTheme, effectiveTheme, type SettingsUser } from "./settings-panel";
+import { WorkspaceContext } from "./workspace-context";
 
 type User = SettingsUser;
 async function api(path: string, options?: RequestInit) {
@@ -19,9 +20,9 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   useEffect(() => {
     if (!user) return;
-    applyTheme(user.preferences.theme);
+    applyTheme(effectiveTheme(user));
     const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const sync = () => { if (user.preferences.theme === "system") applyTheme("system"); };
+    const sync = () => { if (effectiveTheme(user) === "system") applyTheme("system"); };
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, [user]);
@@ -40,7 +41,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   }
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#f4f3ed] text-[#22322b]" role="status">Verificando acesso…</main>;
   if (!user) return <AccessForm initialError={error} firstAdmin={firstAdmin} onLogin={setUser} />;
-  return <><div className="flex flex-wrap items-center justify-end gap-3 border-b border-[#e4e3dc] bg-white px-5 py-2 text-sm text-[#536158]"><span>{user.name}</span><button onClick={() => { setSettingsOpen(!settingsOpen); setManaging(false); }} aria-expanded={settingsOpen} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]"><Settings size={18} /> Configurações</button>{user.role === "admin" && <button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]" onClick={() => { setManaging(!managing); setSettingsOpen(false); }} aria-expanded={managing}><Users size={17} /> Contas</button>}<button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3" onClick={logout}><LogOut size={17} /> Sair</button></div>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && <Accounts onClose={() => setManaging(false)} />}{settingsOpen && <SettingsPanel user={user} onUser={setUser} onBack={() => setSettingsOpen(false)} accounts={<Accounts onClose={() => setSettingsOpen(false)} />} onCabins={() => { setSettingsOpen(false); window.dispatchEvent(new Event("open-cabin-settings")); }} />}<div hidden={settingsOpen}>{children}</div></>;
+  return <><div className="flex flex-wrap items-center justify-end gap-3 border-b border-[#e4e3dc] bg-white px-5 py-2 text-sm text-[#536158]"><span>{user.name}</span><button onClick={() => { setSettingsOpen(!settingsOpen); setManaging(false); }} aria-expanded={settingsOpen} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]"><Settings size={18} /> Configurações</button>{user.role === "admin" && !user.preferences.betaEnabled && <button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]" onClick={() => { setManaging(!managing); setSettingsOpen(false); }} aria-expanded={managing}><Users size={17} /> Contas</button>}<button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3" onClick={logout}><LogOut size={17} /> Sair</button></div>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && !user.preferences.betaEnabled && <Accounts onClose={() => setManaging(false)} />}{settingsOpen && <SettingsPanel user={user} onUser={setUser} onBack={() => setSettingsOpen(false)} accounts={<Accounts onClose={() => setSettingsOpen(false)} />} onCabins={() => { setSettingsOpen(false); window.dispatchEvent(new Event("open-cabin-settings")); }} />}{user.preferences.betaEnabled && <div role="status" className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5d1af] bg-[#f3e9da] px-5 py-3 text-sm text-[#906a36]"><span><b>MODO BETA</b> · Ambiente de testes pessoal. Dados e anexos reais protegidos.</span><button onClick={() => setSettingsOpen(true)} className="min-h-11 rounded-lg border border-current px-3 font-semibold">Gerenciar Modo Beta</button></div>}<WorkspaceContext.Provider value={{ mode: user.preferences.betaEnabled ? "beta" : "production", documentPrefix: user.preferences.betaEnabled ? `beta/${user.id}/reservas/` : "reservas/" }}><div key={user.preferences.betaEnabled ? "beta" : "production"} hidden={settingsOpen}>{children}</div></WorkspaceContext.Provider></>;
 }
 function AccessForm({ initialError, firstAdmin, onLogin }: { initialError: string; firstAdmin: boolean; onLogin: (user: User) => void }) {
   const [register, setRegister] = useState(firstAdmin);

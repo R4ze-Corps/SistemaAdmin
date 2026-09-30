@@ -1,5 +1,6 @@
 import { Account, AuthError, authFailure, authorize, createSession, hashPassword, legacyLoginFilter, normalizeLogin, publicAccount, rateLimit, revokeOtherSessions, validLogin, verifyPassword } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
+import { workspaceFor } from "@/lib/workspace";
 export const runtime = "nodejs";
 export async function GET() {
   try {
@@ -14,14 +15,23 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const db = await getDatabase();
     const users = db.collection<Account>("users");
+    if (body.action === "beta") {
+      if (typeof body.enabled !== "boolean") throw new AuthError("Estado do Modo Beta inválido.", 400);
+      await users.updateOne({ _id: user._id }, { $set: { "preferences.betaEnabled": body.enabled } });
+      user.preferences = { theme: user.preferences?.theme ?? "system", ...user.preferences, betaEnabled: body.enabled };
+      return Response.json({ user: publicAccount(user), message: body.enabled ? "Modo Beta ativado. Os dados reais estão protegidos." : "Modo normal restaurado. Os testes continuam separados." });
+    }
+    if (user.preferences?.betaEnabled && !["preferences"].includes(body.action)) throw new AuthError("Volte ao modo normal para alterar sua conta ou sessões reais.", 409);
     if (body.action === "sessions") {
       await revokeOtherSessions(user);
       return Response.json({ user: publicAccount(user), message: "Outras sessões encerradas.", activeSessions: 1 });
     }
     if (body.action === "preferences") {
+      workspaceFor(user, request.headers.get("x-refugio-mode"));
       if (!["light", "dark", "system"].includes(body.theme)) throw new AuthError("Tema inválido.", 400);
-      user.preferences = { theme: body.theme };
-      await users.updateOne({ _id: user._id }, { $set: { preferences: user.preferences } });
+      const field = user.preferences?.betaEnabled ? "betaTheme" : "theme";
+      user.preferences = { theme: user.preferences?.theme ?? "system", ...user.preferences, [field]: body.theme };
+      await users.updateOne({ _id: user._id }, { $set: { [`preferences.${field}`]: body.theme } });
     } else if (body.action === "profile") {
       const name = typeof body.name === "string" ? body.name.trim() : "";
       const username = normalizeLogin(body.username);

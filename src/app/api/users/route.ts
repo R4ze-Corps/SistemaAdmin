@@ -11,7 +11,8 @@ export async function GET() {
 }
 export async function PATCH(request: Request) {
   try {
-    await authorize(request, true);
+    const user = await authorize(request, true);
+    if (user.preferences?.betaEnabled) throw new AuthError("Desative o Modo Beta para alterar contas reais.", 409);
     const body = await request.json();
     if (typeof body.id !== "string" || !ObjectId.isValid(body.id) || !["approved", "blocked"].includes(body.status)) throw new AuthError("Dados inválidos.", 400);
     const db = await getDatabase();

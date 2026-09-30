@@ -8,7 +8,7 @@ const scrypt = (password: string, salt: string) => new Promise<Buffer>((resolve,
 });
 const COOKIE = "refugio-session";
 const MAX_AGE = 60 * 60 * 24 * 7;
-export type Account = { _id: ObjectId; name: string; username?: string; email?: string; passwordHash: string; preferences?: { theme: "light" | "dark" | "system" }; role: "admin" | "member"; status: "pending" | "approved" | "blocked"; createdAt: Date };
+export type Account = { _id: ObjectId; name: string; username?: string; email?: string; passwordHash: string; preferences?: { theme: "light" | "dark" | "system"; betaTheme?: "light" | "dark" | "system"; betaEnabled?: boolean }; role: "admin" | "member"; status: "pending" | "approved" | "blocked"; createdAt: Date };
 export function normalizeLogin(value: unknown) {
   return typeof value === "string" ? value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase() : "";
 }

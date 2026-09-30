@@ -8,17 +8,19 @@ const require = createRequire(import.meta.url);
 // Execute the actual TypeScript helpers with only cookies/database substituted.
 let cookie;
 let databaseCalls = 0;
+let workspace;
 function load(relative, imports = {}) {
   const source = readFileSync(new URL(relative, import.meta.url), "utf8");
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const compiled = { exports: {} };
-  new Function("require", "module", "exports", code)(id => id in imports ? imports[id] : require(id), compiled, compiled.exports);
+  new Function("require", "module", "exports", code)(id => id in imports ? imports[id] : id === "@/lib/workspace" ? workspace : require(id), compiled, compiled.exports);
   return compiled.exports;
 }
 const auth = load("../src/lib/auth.ts", {
   "next/headers": { cookies: async () => ({ get: () => cookie }) },
   "./mongodb": { getDatabase: async () => { databaseCalls++; throw new Error("Database must not be accessed without a session"); } },
 });
+workspace = load("../src/lib/workspace.ts", { "./auth": auth });
 
 test("passwords have random salts and do not contain the plaintext", async () => {
   const password = "Senha de teste longa 123!";
@@ -181,14 +183,20 @@ test("account settings validate profile, persist theme, and protect password cha
   const users = {
     createIndex: async () => {},
     findOne: async () => conflict ? makeAccount("ocupado") : null,
-    updateOne: async (_filter, update) => { Object.assign(user, update.$set); return { matchedCount: 1 }; },
+    updateOne: async (_filter, update) => {
+      for (const [key, value] of Object.entries(update.$set)) {
+        if (key.startsWith("preferences.")) user.preferences = { ...user.preferences, [key.split(".")[1]]: value };
+        else user[key] = value;
+      }
+      return { matchedCount: 1 };
+    },
   };
   const sessions = { countDocuments: async () => 3, deleteMany: async () => { revoked = true; } };
   const route = load("../src/app/api/account/route.ts", {
     "@/lib/mongodb": { getDatabase: async () => ({ collection: name => name === "users" ? users : sessions }) },
     "@/lib/auth": { ...auth, authorize: async () => ({ ...user }), rateLimit: async () => {}, verifyPassword: async password => password === "1234", hashPassword: async () => "new-password-hash", createSession: async () => { recreated = true; }, revokeOtherSessions: async () => { otherRevoked = true; } },
   });
-  const patch = body => route.PATCH(new Request("http://localhost/api/account", { method: "PATCH", headers: { origin: "http://localhost", "content-type": "application/json" }, body: JSON.stringify(body) }));
+  const patch = body => route.PATCH(new Request("http://localhost/api/account", { method: "PATCH", headers: { origin: "http://localhost", "content-type": "application/json", "x-refugio-mode": user.preferences?.betaEnabled ? "beta" : "production" }, body: JSON.stringify(body) }));
   assert.equal((await (await route.GET()).json()).activeSessions, 3);
   assert.equal((await patch({ action: "preferences", theme: "invalid" })).status, 400);
   assert.equal((await patch({ action: "preferences", theme: "dark", role: "admin" })).status, 200);
@@ -213,4 +221,69 @@ test("account settings validate profile, persist theme, and protect password cha
   assert.equal(response.status, 200);
   assert.equal(otherRevoked, true);
   assert.equal("passwordHash" in (await response.json()).user, false);
+  assert.equal((await patch({ action: "beta", enabled: "true" })).status, 400);
+  assert.equal((await patch({ action: "beta", enabled: true })).status, 200);
+  assert.equal(user.preferences.betaEnabled, true);
+  assert.equal((await patch({ action: "profile", name: "Teste", username: "novo" })).status, 409);
+  assert.equal((await patch({ action: "password", currentPassword: "1234", password: "5678" })).status, 409);
+  assert.equal((await patch({ action: "sessions" })).status, 409);
+  assert.equal((await patch({ action: "preferences", theme: "light" })).status, 200);
+  assert.equal(user.preferences.betaTheme, "light");
+  assert.equal(user.preferences.theme, "dark");
+  assert.equal((await patch({ action: "beta", enabled: false })).status, 200);
+  assert.equal(user.preferences.theme, "dark");
+});
+test("Beta data is isolated per account and stale environment requests are rejected", async () => {
+  const user = makeAccount("betauser");
+  user.preferences = { theme: "system", betaEnabled: true };
+  const original = { key: "main", cabins: [{ id: "c1", name: "Chalé real" }], bookings: [{ id: "real" }], financeEntries: [{ value: 100 }], payables: [{ id: "conta" }] };
+  const snapshot = JSON.stringify(original);
+  const rows = new Map([["app_state:main", original]]);
+  const db = { collection: name => ({
+    createIndex: async () => {},
+    findOne: async query => rows.get(`${name}:${query.key}`) ?? null,
+    updateOne: async (query, update) => {
+      const key = `${name}:${query.key}`;
+      if (!rows.has(key) && update.$setOnInsert) rows.set(key, structuredClone(update.$setOnInsert));
+      if (update.$set) rows.set(key, structuredClone(update.$set));
+    },
+  }) };
+  const route = load("../src/app/api/state/route.ts", { "@/lib/auth": { ...auth, authorize: async () => user }, "@/lib/mongodb": { getDatabase: async () => db } });
+  const request = (mode, method = "GET", body) => new Request("http://localhost/api/state", { method, headers: { "x-refugio-mode": mode, origin: "http://localhost", "content-type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  const data = await (await route.GET(request("beta"))).json();
+  assert.equal(data.cabins[0].name, "Chalé real");
+  assert.deepEqual(data.bookings, []);
+  const tested = { cabins: [{ name: "Chalé de teste" }], bookings: [{ id: "teste" }], financeEntries: [], payables: [] };
+  assert.equal((await route.PUT(request("beta", "PUT", tested))).status, 200);
+  assert.equal(JSON.stringify(original), snapshot);
+  assert.equal((await route.PUT(request("production", "PUT", tested))).status, 409);
+  user.preferences.betaEnabled = false;
+  assert.equal((await route.PUT(request("beta", "PUT", tested))).status, 409);
+  assert.equal((await (await route.GET(request("production"))).json()).bookings[0].id, "real");
+  user.preferences.betaEnabled = true;
+  assert.equal((await (await route.GET(request("beta"))).json()).bookings[0].id, "teste");
+  user._id = new (require("mongodb").ObjectId)();
+  assert.deepEqual((await (await route.GET(request("beta"))).json()).bookings, []);
+});
+test("Beta cannot delete/download real documents or upload to production", async () => {
+  const user = makeAccount("betauser");
+  user.preferences = { theme: "system", betaEnabled: true };
+  let deleted = 0;
+  let downloaded = 0;
+  const imports = { "@/lib/auth": { ...auth, authorize: async () => user }, "@vercel/blob": { del: async () => { deleted++; }, get: async () => { downloaded++; return null; } } };
+  const remove = load("../src/app/api/documents/route.ts", imports);
+  const download = load("../src/app/api/documents/download/route.ts", imports);
+  const path = `beta/${user._id.toHexString()}/reservas/teste.pdf`;
+  for (const pathname of ["reservas/real.pdf", "beta/outra-conta/reservas/teste.pdf"]) {
+    assert.equal((await remove.DELETE(new Request(`http://localhost/api/documents?pathname=${pathname}`, { method: "DELETE", headers: { "x-refugio-mode": "beta" } }))).status, 403);
+    assert.equal((await download.GET(new Request(`http://localhost/api/documents/download?pathname=${pathname}&mode=beta`))).status, 403);
+  }
+  assert.equal(deleted + downloaded, 0);
+  assert.equal((await remove.DELETE(new Request(`http://localhost/api/documents?pathname=${path}`, { method: "DELETE", headers: { "x-refugio-mode": "beta" } }))).status, 200);
+  assert.equal(deleted, 1);
+  const upload = load("../src/app/api/blob/upload/route.ts", { ...imports, "@vercel/blob/client": { handleUpload: async options => options.onBeforeGenerateToken(options.body.pathname) } });
+  const post = pathname => upload.POST(new Request("http://localhost/api/blob/upload", { method: "POST", body: JSON.stringify({ pathname }) }));
+  assert.equal((await post("reservas/real.pdf")).status, 409);
+  assert.equal((await post("beta/outra-conta/reservas/teste.pdf")).status, 403);
+  assert.equal((await post(path)).status, 200);
 });
