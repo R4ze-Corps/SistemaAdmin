@@ -23,9 +23,6 @@ export class AuthError extends Error {
   constructor(message: string, public status: number) { super(message); }
 }
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
-export function secretMatches(value: string, expected: string) {
-  return timingSafeEqual(Buffer.from(digest(value), "hex"), Buffer.from(digest(expected), "hex"));
-}
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const key = await scrypt(password, salt);

@@ -20,13 +20,15 @@ Acesse `http://localhost:3000`.
 
 ## Contas e login
 
-Configure `ADMIN_LOGIN` e `ADMIN_SETUP_KEY` em `.env.local` e nas variáveis da Vercel.
-A chave deve ser aleatória, secreta e ter pelo menos 32 caracteres. Gere uma com
-`node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`.
-Nunca use uma variável `NEXT_PUBLIC_` para a chave.
-
-Na tela de cadastro, use o nome de login configurado e abra **Configurar conta administradora**
-para informar a chave. A conta administradora recebe acesso imediato ao painel existente.
+Quando não existe administrador no MongoDB, o site mostra **Criar administrador**.
+O primeiro cadastro concluído cria a conta administradora e abre o painel existente.
+Não há login/senha ou chave de administrador no `.env`; configurar variáveis não cria contas.
+Faça esse primeiro cadastro antes de divulgar o endereço: em um site público ainda sem
+administrador, qualquer visitante pode assumir essa conta inicial.
+A criação usa uma transação e um registro único em `auth_bootstrap`, evitando dois
+administradores em cadastros simultâneos e liberando a tentativa se o cadastro falhar.
+MongoDB precisa suportar transações (MongoDB Atlas ou replica set; não standalone).
+Se já existir um administrador, ele é preservado e não há nova configuração inicial.
 Os demais cadastros ficam pendentes: o administrador usa **Contas** para aprovar ou bloquear.
 Todas as contas aprovadas compartilham o mesmo painel e podem alterar todos os dados.
 Bloquear uma conta invalida suas sessões. A conta administradora não pode ser bloqueada pela interface.
@@ -45,8 +47,9 @@ Contas antigas sem login podem entrar usando o nome de exibição e a senha exis
 desde que o nome seja válido e não haja duplicidade; o login é associado após autenticação.
 Nomes antigos inválidos ou duplicados precisam de ajuste pelo responsável do banco.
 Os e-mails antigos são preservados, mas não são aceitos para entrar.
-Substitua a antiga variável `ADMIN_EMAIL` por `ADMIN_LOGIN`. Não há recuperação de senha nesta versão.
-As coleções `users`, `auth_sessions` e `auth_limits` são criadas ao utilizar a autenticação.
+As antigas variáveis `ADMIN_EMAIL`, `ADMIN_LOGIN` e `ADMIN_SETUP_KEY` não são mais utilizadas.
+Não há recuperação de senha nesta versão.
+As coleções `users`, `auth_bootstrap`, `auth_sessions` e `auth_limits` são criadas ao utilizar a autenticação.
 Os dados existentes em `app_state` e os documentos no Blob não são migrados nem apagados.
 
 ## Banco de dados
@@ -64,7 +67,7 @@ Nunca versione `.env` ou `.env.local`. A rota `GET /api/health` confirma a conex
 
 1. Envie este repositório para GitHub, GitLab ou Bitbucket.
 2. Importe o repositório na Vercel.
-3. Cadastre `MONGODB_URI`, `MONGODB_DB`, `BLOB_READ_WRITE_TOKEN`, `ADMIN_LOGIN` e `ADMIN_SETUP_KEY` nas variáveis de ambiente do projeto.
+3. Cadastre `MONGODB_URI`, `MONGODB_DB` e `BLOB_READ_WRITE_TOKEN` nas variáveis de ambiente do projeto.
 4. Faça o deploy.
 
 Antes de publicar, valide com:

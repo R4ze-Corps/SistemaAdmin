@@ -1,12 +1,18 @@
 import { ObjectId } from "mongodb";
-import { Account, AuthError, authFailure, createSession, currentAccount, endSession, hashPassword, legacyLoginFilter, normalizeLogin, publicAccount, rateLimit, sameOrigin, secretMatches, validLogin, verifyPassword } from "@/lib/auth";
+import { Account, AuthError, authFailure, createSession, currentAccount, endSession, hashPassword, legacyLoginFilter, normalizeLogin, publicAccount, rateLimit, sameOrigin, validLogin, verifyPassword } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
+import { registerAccount } from "@/lib/register-account";
 
 export const runtime = "nodejs";
 type Context = { params: Promise<{ action: string }> };
 export async function GET(_request: Request, context: Context) {
   try {
-    if ((await context.params).action !== "me") throw new AuthError("Rota não encontrada.", 404);
+    const { action } = await context.params;
+    if (action === "setup") {
+      const administrator = await (await getDatabase()).collection<Account>("users").findOne({ role: "admin" }, { projection: { _id: 1 } });
+      return Response.json({ needsAdministrator: !administrator }, { headers: { "Cache-Control": "no-store" } });
+    }
+    if (action !== "me") throw new AuthError("Rota não encontrada.", 404);
     const user = await currentAccount();
     return Response.json({ user: user ? publicAccount(user) : null }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) { return authFailure(error); }
@@ -32,11 +38,6 @@ export async function POST(request: Request, context: Context) {
     if (action === "register") {
       const name = typeof body.name === "string" ? body.name.trim() : "";
       if (name.length < 2 || name.length > 100) throw new AuthError("Informe um nome de 2 a 100 caracteres.", 400);
-      const adminLogin = normalizeLogin(process.env.ADMIN_LOGIN);
-      const setupKey = process.env.ADMIN_SETUP_KEY;
-      if (!validLogin(adminLogin) || !setupKey || setupKey.length < 32) throw new AuthError("O administrador precisa configurar ADMIN_LOGIN e ADMIN_SETUP_KEY no servidor.", 503);
-      const admin = username === adminLogin;
-      if (admin && (typeof body.setupKey !== "string" || !secretMatches(body.setupKey, setupKey))) throw new AuthError("Chave de configuração inválida.", 403);
       if (await users.findOne({ $or: [{ username }, legacyLoginFilter(username)] })) throw new AuthError("Este nome de login já está em uso.", 409);
       // Preserve old email data/uniqueness, but allow multiple new accounts without email.
       const indexes = await users.listIndexes().toArray();
@@ -46,9 +47,10 @@ export async function POST(request: Request, context: Context) {
           try { await users.dropIndex(index.name); } catch (error) { if ((error as { code?: number }).code !== 27) throw error; }
         }
       }
-      const user: Account = { _id: new ObjectId(), name, username, passwordHash: await hashPassword(password), role: admin ? "admin" : "member", status: admin ? "approved" : "pending", createdAt: new Date() };
-      try { await users.insertOne(user); }
+      const user: Account = { _id: new ObjectId(), name, username, passwordHash: await hashPassword(password), role: "member", status: "pending", createdAt: new Date() };
+      try { await registerAccount(user); }
       catch (error) { if ((error as { code?: number }).code === 11000) throw new AuthError("Não foi possível criar esta conta. Tente entrar ou contate o administrador.", 409); throw error; }
+      const admin = user.role === "admin";
       if (admin) await createSession(user);
       return Response.json({ user: admin ? publicAccount(user) : null, pending: !admin, message: admin ? "Conta administradora criada." : "Cadastro recebido. Aguarde a aprovação do administrador." }, { status: 201 });
     }

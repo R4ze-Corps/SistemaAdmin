@@ -30,10 +30,6 @@ test("passwords have random salts and do not contain the plaintext", async () =>
   assert.equal(await auth.verifyPassword("Outra senha longa", first), false);
   assert.equal(await auth.verifyPassword(password, "invalid"), false);
 });
-test("bootstrap key comparison rejects different secrets", () => {
-  assert.equal(auth.secretMatches("a".repeat(32), "a".repeat(32)), true);
-  assert.equal(auth.secretMatches("b", "a".repeat(32)), false);
-});
 test("login normalization is case-insensitive and validates names, not email", () => {
   assert.equal(auth.normalizeLogin("  Kawan   Silva  "), "kawan silva");
   assert.equal(auth.normalizeLogin(null), "");
@@ -78,56 +74,101 @@ test("unexpected server errors do not expose database secrets", async () => {
   assert.equal(response.status, 503);
   assert.equal((await response.text()).includes("secret"), false);
 });
-test("username registration persists account data and login respects approval", async () => {
-  const previousLogin = process.env.ADMIN_LOGIN;
-  const previousKey = process.env.ADMIN_SETUP_KEY;
-  process.env.ADMIN_LOGIN = "administrador";
-  process.env.ADMIN_SETUP_KEY = "s".repeat(32);
-  const stored = [];
-  let sessionUser;
+// Transactional Mongo fixture: no real database writes or administrator account.
+function registrationFixture(initial = []) {
+  const stored = [...initial];
+  let lock = null;
+  let queue = Promise.resolve();
+  let failInsert = false;
   const users = {
     createIndex: async () => "index",
     listIndexes: () => ({ toArray: async () => [] }),
-    findOne: async filter => stored.find(user => user.username === (filter.username || filter.$or?.[0]?.username)) || null,
+    findOne: async filter => stored.find(user => filter.role ? user.role === filter.role : user.username === (filter.username || filter.$or?.[0]?.username)) || null,
     find: () => ({ limit: () => ({ toArray: async () => [] }) }),
-    insertOne: async user => { stored.push(user); },
+    insertOne: async user => {
+      if (failInsert) { failInsert = false; throw new Error("simulated insert failure"); }
+      if (stored.some(item => item.username === user.username)) throw Object.assign(new Error("duplicate"), { code: 11000 });
+      stored.push(user);
+    },
   };
+  const bootstrap = {
+    updateOne: async (_filter, update) => { if (!lock) lock = { _id: "administrator", administratorId: null, revision: 0 }; Object.assign(lock, update.$set); },
+    findOneAndUpdate: async () => { lock.revision++; return { ...lock }; },
+  };
+  const db = { collection: name => name === "auth_bootstrap" ? bootstrap : users };
+  const client = { startSession: () => ({
+    withTransaction: async callback => {
+      const previous = queue;
+      let release;
+      queue = new Promise(resolve => { release = resolve; });
+      await previous;
+      const original = stored.map(user => ({ ...user }));
+      const originalLock = { ...lock };
+      try { return await callback(); }
+      catch (error) { stored.splice(0, stored.length, ...original); lock = originalLock; throw error; }
+      finally { release(); }
+    },
+    endSession: async () => {},
+  }) };
+  const mongodb = { getDatabase: async () => db, getMongoClient: async () => client };
+  const registration = load("../src/lib/register-account.ts", { "./auth": auth, "./mongodb": mongodb });
+  return { stored, mongodb, registration, failNextInsert: () => { failInsert = true; } };
+}
+const makeAccount = username => ({ _id: new (require("mongodb").ObjectId)(), name: username, username, passwordHash: "salt:hashed-password", role: "member", status: "pending", createdAt: new Date() });
+test("first registration becomes admin and later registrations require approval, without env", async () => {
+  const fixture = registrationFixture();
+  let sessionUser;
   const route = load("../src/app/api/auth/[action]/route.ts", {
-    "@/lib/mongodb": { getDatabase: async () => ({ collection: () => users }) },
+    "@/lib/mongodb": fixture.mongodb,
+    "@/lib/register-account": fixture.registration,
     "@/lib/auth": { ...auth, rateLimit: async () => {}, hashPassword: async () => "salt:hashed-password", verifyPassword: async (password, hash) => password === "Teste123" && hash === "salt:hashed-password", createSession: async user => { sessionUser = user; } },
   });
   const post = (action, body) => route.POST(new Request(`http://localhost/api/auth/${action}`, { method: "POST", headers: { origin: "http://localhost", "content-type": "application/json" }, body: JSON.stringify(body) }), { params: Promise.resolve({ action }) });
-  try {
-    for (const password of ["", "123", "123456789"]) {
-      assert.equal((await post("register", { name: "Limite", username: "limite", password })).status, 400);
-    }
-    for (const password of ["1234", "12345678"]) {
-      assert.equal((await post("register", { name: "Limite", username: "administrador", password, setupKey: "errada" })).status, 403);
-    }
-    const result = await post("register", { name: "Kawan", username: " KAWAN ", password: "Teste123" });
-    assert.equal(result.status, 201);
-    assert.equal((await result.json()).pending, true);
-    assert.equal(stored[0].username, "kawan");
-    assert.equal(stored[0].name, "Kawan");
-    assert.equal(stored[0].passwordHash, "salt:hashed-password");
-    assert.equal("password" in stored[0], false);
-    assert.equal("email" in stored[0], false);
-    assert.equal(sessionUser, undefined);
-    assert.equal((await post("register", { name: "Outro Kawan", username: "KAWAN", password: "Teste123" })).status, 409);
-    assert.equal((await post("login", { username: "kawan", password: "Teste123" })).status, 403);
-    stored[0].status = "approved";
-    const login = await post("login", { username: "Kawan", password: "Teste123" });
-    assert.equal(login.status, 200);
-    const data = await login.json();
-    assert.equal(data.user.username, "kawan");
-    assert.equal("passwordHash" in data.user, false);
-    assert.equal(sessionUser, stored[0]);
-    assert.equal((await post("login", { username: "kawan", password: "Senha incorreta longa" })).status, 401);
-    assert.equal((await post("register", { name: "Admin", username: "administrador", password: "Teste123", setupKey: "errada" })).status, 403);
-    assert.equal((await post("register", { name: "Admin", username: "administrador", password: "Teste123", setupKey: "s".repeat(32) })).status, 201);
-    assert.equal(stored[1].role, "admin");
-  } finally {
-    if (previousLogin === undefined) delete process.env.ADMIN_LOGIN; else process.env.ADMIN_LOGIN = previousLogin;
-    if (previousKey === undefined) delete process.env.ADMIN_SETUP_KEY; else process.env.ADMIN_SETUP_KEY = previousKey;
-  }
+  const setup = () => route.GET(new Request("http://localhost/api/auth/setup"), { params: Promise.resolve({ action: "setup" }) });
+  assert.equal((await (await setup()).json()).needsAdministrator, true);
+  for (const password of ["", "123", "123456789"]) assert.equal((await post("register", { name: "Limite", username: "limite", password })).status, 400);
+  const result = await post("register", { name: "Kawan", username: " KAWAN ", password: "Teste123", role: "member" });
+  assert.equal(result.status, 201);
+  assert.equal((await result.json()).pending, false);
+  assert.equal(fixture.stored[0].role, "admin");
+  assert.equal(fixture.stored[0].status, "approved");
+  assert.equal(fixture.stored[0].username, "kawan");
+  assert.equal("password" in fixture.stored[0], false);
+  assert.equal("email" in fixture.stored[0], false);
+  assert.equal(sessionUser, fixture.stored[0]);
+  const configured = await (await setup()).json();
+  assert.deepEqual(configured, { needsAdministrator: false });
+  assert.equal((await post("register", { name: "Outro", username: "KAWAN", password: "Teste123" })).status, 409);
+  assert.equal((await post("register", { name: "Membro", username: "membro", password: "1234", role: "admin", status: "approved" })).status, 201);
+  assert.equal(fixture.stored[1].role, "member");
+  assert.equal(fixture.stored[1].status, "pending");
+  assert.equal((await post("login", { username: "membro", password: "Teste123" })).status, 403);
+  fixture.stored[1].status = "approved";
+  const login = await post("login", { username: "MEMBRO", password: "Teste123" });
+  assert.equal(login.status, 200);
+  assert.equal("passwordHash" in (await login.json()).user, false);
+  assert.equal((await post("login", { username: "kawan", password: "Senha incorreta longa" })).status, 401);
+  assert.equal((await post("register", { name: "Limite", username: "limite", password: "12345678" })).status, 201);
+});
+test("simultaneous first registrations create exactly one administrator", async () => {
+  const fixture = registrationFixture();
+  await Promise.all(["primeiro", "segundo", "terceiro"].map(username => fixture.registration.registerAccount(makeAccount(username))));
+  assert.equal(fixture.stored.filter(user => user.role === "admin").length, 1);
+  assert.equal(fixture.stored.filter(user => user.status === "pending").length, 2);
+});
+test("failed first registration rolls back the claim and allows a later administrator", async () => {
+  const fixture = registrationFixture();
+  fixture.failNextInsert();
+  await assert.rejects(fixture.registration.registerAccount(makeAccount("falhou")), /simulated/);
+  assert.equal(fixture.stored.length, 0);
+  await fixture.registration.registerAccount(makeAccount("sucesso"));
+  assert.equal(fixture.stored[0].role, "admin");
+});
+test("an existing administrator is preserved, including when blocked", async () => {
+  const existing = { ...makeAccount("existente"), role: "admin", status: "blocked" };
+  const fixture = registrationFixture([existing]);
+  await fixture.registration.registerAccount(makeAccount("novo"));
+  assert.equal(fixture.stored[0], existing);
+  assert.equal(fixture.stored[1].role, "member");
+  assert.equal(fixture.stored[1].status, "pending");
 });
