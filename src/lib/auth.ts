@@ -8,7 +8,7 @@ const scrypt = (password: string, salt: string) => new Promise<Buffer>((resolve,
 });
 const COOKIE = "refugio-session";
 const MAX_AGE = 60 * 60 * 24 * 7;
-export type Account = { _id: ObjectId; name: string; username?: string; email?: string; passwordHash: string; role: "admin" | "member"; status: "pending" | "approved" | "blocked"; createdAt: Date };
+export type Account = { _id: ObjectId; name: string; username?: string; email?: string; passwordHash: string; preferences?: { theme: "light" | "dark" | "system" }; role: "admin" | "member"; status: "pending" | "approved" | "blocked"; createdAt: Date };
 export function normalizeLogin(value: unknown) {
   return typeof value === "string" ? value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase() : "";
 }
@@ -35,7 +35,7 @@ export async function verifyPassword(password: string, hash: string) {
   return timingSafeEqual(key, Buffer.from(encoded, "hex"));
 }
 export function publicAccount(user: Account) {
-  return { id: user._id.toHexString(), name: user.name, username: user.username ?? user.name, role: user.role, status: user.status };
+  return { id: user._id.toHexString(), name: user.name, username: user.username ?? user.name, role: user.role, status: user.status, preferences: user.preferences ?? { theme: "system" } };
 }
 export async function currentAccount() {
   const token = (await cookies()).get(COOKIE)?.value;
@@ -72,6 +72,11 @@ export async function endSession() {
   const token = store.get(COOKIE)?.value;
   if (token) await (await getDatabase()).collection("auth_sessions").deleteOne({ tokenHash: digest(token) });
   store.delete(COOKIE);
+}
+export async function revokeOtherSessions(user: Account) {
+  const token = (await cookies()).get(COOKIE)?.value;
+  if (!token) throw new AuthError("Entre novamente para continuar.", 401);
+  return (await getDatabase()).collection("auth_sessions").deleteMany({ userId: user._id, tokenHash: { $ne: digest(token) } });
 }
 // Atomic, persisted limiter: works across Vercel instances (no in-memory counters).
 export async function rateLimit(request: Request, username: string) {

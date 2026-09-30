@@ -1,8 +1,9 @@
 "use client";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
-import { Eye, EyeOff, LogOut, ShieldCheck, TreePalm, Users, X } from "lucide-react";
+import { Eye, EyeOff, LogOut, Settings, ShieldCheck, TreePalm, Users, X } from "lucide-react";
+import SettingsPanel, { applyTheme, type SettingsUser } from "./settings-panel";
 
-type User = { id: string; name: string; username: string; role: "admin" | "member"; status: "pending" | "approved" | "blocked" };
+type User = SettingsUser;
 async function api(path: string, options?: RequestInit) {
   const response = await fetch(path, { ...options, cache: "no-store" });
   const data = await response.json();
@@ -15,20 +16,31 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const [managing, setManaging] = useState(false);
   const [firstAdmin, setFirstAdmin] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    applyTheme(user.preferences.theme);
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const sync = () => { if (user.preferences.theme === "system") applyTheme("system"); };
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, [user]);
   useEffect(() => {
     let active = true;
     Promise.all([api("/api/auth/me"), api("/api/auth/setup")]).then(([data, setup]) => { if (active) { setUser(data.user); setFirstAdmin(setup.needsAdministrator); } }).catch(error => { if (active) setError(error.message); }).finally(() => { if (active) setLoading(false); });
-    const expired = () => { setUser(null); setError("Sua sessão expirou. Entre novamente."); };
+    const expired = () => { setUser(null); setSettingsOpen(false); setManaging(false); setError("Sua sessão expirou. Entre novamente."); };
+    const updated = (event: Event) => setUser((event as CustomEvent<User>).detail);
     window.addEventListener("auth-expired", expired);
-    return () => { active = false; window.removeEventListener("auth-expired", expired); };
+    window.addEventListener("account-updated", updated);
+    return () => { active = false; window.removeEventListener("auth-expired", expired); window.removeEventListener("account-updated", updated); };
   }, []);
   async function logout() {
-    try { await api("/api/auth/logout", { method: "POST" }); setUser(null); setManaging(false); }
+    try { await api("/api/auth/logout", { method: "POST" }); setUser(null); setManaging(false); setSettingsOpen(false); }
     catch (error) { setError(error instanceof Error ? error.message : "Não foi possível sair."); }
   }
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#f4f3ed] text-[#22322b]" role="status">Verificando acesso…</main>;
   if (!user) return <AccessForm initialError={error} firstAdmin={firstAdmin} onLogin={setUser} />;
-  return <><div className="flex flex-wrap items-center justify-end gap-3 border-b border-[#e4e3dc] bg-white px-5 py-2 text-sm text-[#536158]"><span>{user.name}</span>{user.role === "admin" && <button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]" onClick={() => setManaging(!managing)} aria-expanded={managing}><Users size={17} /> Contas</button>}<button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3" onClick={logout}><LogOut size={17} /> Sair</button></div>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && <Accounts onClose={() => setManaging(false)} />}{children}</>;
+  return <><div className="flex flex-wrap items-center justify-end gap-3 border-b border-[#e4e3dc] bg-white px-5 py-2 text-sm text-[#536158]"><span>{user.name}</span><button onClick={() => { setSettingsOpen(!settingsOpen); setManaging(false); }} aria-expanded={settingsOpen} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]"><Settings size={18} /> Configurações</button>{user.role === "admin" && <button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-semibold text-[#1f4b3a]" onClick={() => { setManaging(!managing); setSettingsOpen(false); }} aria-expanded={managing}><Users size={17} /> Contas</button>}<button className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3" onClick={logout}><LogOut size={17} /> Sair</button></div>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && <Accounts onClose={() => setManaging(false)} />}{settingsOpen && <SettingsPanel user={user} onUser={setUser} onBack={() => setSettingsOpen(false)} accounts={<Accounts onClose={() => setSettingsOpen(false)} />} onCabins={() => { setSettingsOpen(false); window.dispatchEvent(new Event("open-cabin-settings")); }} />}<div hidden={settingsOpen}>{children}</div></>;
 }
 function AccessForm({ initialError, firstAdmin, onLogin }: { initialError: string; firstAdmin: boolean; onLogin: (user: User) => void }) {
   const [register, setRegister] = useState(firstAdmin);

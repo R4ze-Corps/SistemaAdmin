@@ -58,12 +58,12 @@ test("no session and malformed tokens are rejected without reading application d
 });
 test("state, users and document routes deny unauthenticated access", async () => {
   const imports = { "@/lib/auth": auth, "@/lib/mongodb": { getDatabase: () => { throw new Error("Unexpected data access"); } } };
-  for (const path of ["state", "users", "documents/download", "health"]) {
+  for (const path of ["state", "users", "documents/download", "health", "account"]) {
     const route = load(`../src/app/api/${path}/route.ts`, imports);
     const response = await route.GET(new Request(`http://localhost/api/${path}`));
     assert.equal(response.status, 401, path);
   }
-  for (const [path, method] of [["state", "PUT"], ["users", "PATCH"], ["documents", "DELETE"]]) {
+  for (const [path, method] of [["state", "PUT"], ["users", "PATCH"], ["documents", "DELETE"], ["account", "PATCH"]]) {
     const route = load(`../src/app/api/${path}/route.ts`, imports);
     const response = await route[method](new Request(`http://localhost/api/${path}`, { method, headers: { origin: "http://localhost" } }));
     assert.equal(response.status, 401, path);
@@ -171,4 +171,46 @@ test("an existing administrator is preserved, including when blocked", async () 
   assert.equal(fixture.stored[0], existing);
   assert.equal(fixture.stored[1].role, "member");
   assert.equal(fixture.stored[1].status, "pending");
+});
+test("account settings validate profile, persist theme, and protect password changes", async () => {
+  const user = { ...makeAccount("usuario"), status: "approved" };
+  let conflict = false;
+  let revoked = false;
+  let recreated = false;
+  let otherRevoked = false;
+  const users = {
+    createIndex: async () => {},
+    findOne: async () => conflict ? makeAccount("ocupado") : null,
+    updateOne: async (_filter, update) => { Object.assign(user, update.$set); return { matchedCount: 1 }; },
+  };
+  const sessions = { countDocuments: async () => 3, deleteMany: async () => { revoked = true; } };
+  const route = load("../src/app/api/account/route.ts", {
+    "@/lib/mongodb": { getDatabase: async () => ({ collection: name => name === "users" ? users : sessions }) },
+    "@/lib/auth": { ...auth, authorize: async () => ({ ...user }), rateLimit: async () => {}, verifyPassword: async password => password === "1234", hashPassword: async () => "new-password-hash", createSession: async () => { recreated = true; }, revokeOtherSessions: async () => { otherRevoked = true; } },
+  });
+  const patch = body => route.PATCH(new Request("http://localhost/api/account", { method: "PATCH", headers: { origin: "http://localhost", "content-type": "application/json" }, body: JSON.stringify(body) }));
+  assert.equal((await (await route.GET()).json()).activeSessions, 3);
+  assert.equal((await patch({ action: "preferences", theme: "invalid" })).status, 400);
+  assert.equal((await patch({ action: "preferences", theme: "dark", role: "admin" })).status, 200);
+  assert.equal(user.preferences.theme, "dark");
+  assert.equal(user.role, "member");
+  assert.equal((await patch({ action: "profile", name: "Novo Nome", username: "usuario" })).status, 200);
+  assert.equal(user.name, "Novo Nome");
+  assert.equal((await patch({ action: "profile", name: "Nome", username: "novo", currentPassword: "errada" })).status, 403);
+  assert.equal(user.username, "usuario");
+  conflict = true;
+  assert.equal((await patch({ action: "profile", name: "Nome", username: "ocupado", currentPassword: "1234" })).status, 409);
+  conflict = false;
+  assert.equal((await patch({ action: "profile", name: "Nome", username: "NOVO", currentPassword: "1234" })).status, 200);
+  assert.equal(user.username, "novo");
+  assert.equal((await patch({ action: "password", currentPassword: "1234", password: "123" })).status, 400);
+  assert.equal((await patch({ action: "password", currentPassword: "errada", password: "5678" })).status, 403);
+  assert.equal(user.passwordHash, "salt:hashed-password");
+  assert.equal((await patch({ action: "password", currentPassword: "1234", password: "5678" })).status, 200);
+  assert.equal(user.passwordHash, "new-password-hash");
+  assert.equal(revoked && recreated, true);
+  const response = await patch({ action: "sessions" });
+  assert.equal(response.status, 200);
+  assert.equal(otherRevoked, true);
+  assert.equal("passwordHash" in (await response.json()).user, false);
 });

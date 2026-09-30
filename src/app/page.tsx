@@ -5,6 +5,7 @@ import { upload } from "@vercel/blob/client";
 import FinancePanel, { type FinanceEntry } from "./finance-panel";
 import { type Payable } from "./payables-panel";
 import AuthGate from "./auth-gate";
+import { applyTheme } from "./settings-panel";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Coffee, Dog, Download, FileText, LayoutDashboard, LogIn, Moon, LogOut, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, X } from "lucide-react";
 
 type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
@@ -52,12 +53,24 @@ function Dashboard() {
   const [hydrated, setHydrated] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
-  useEffect(() => { const frame = requestAnimationFrame(() => setDarkMode(document.documentElement.classList.contains("dark"))); return () => cancelAnimationFrame(frame); }, []);
-  const toggleTheme = () => {
+  useEffect(() => {
+    const sync = () => setDarkMode(document.documentElement.classList.contains("dark"));
+    const cabins = () => setCabinsOpen(true);
+    const frame = requestAnimationFrame(sync);
+    window.addEventListener("theme-changed", sync);
+    window.addEventListener("open-cabin-settings", cabins);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("theme-changed", sync); window.removeEventListener("open-cabin-settings", cabins); };
+  }, []);
+  const toggleTheme = async () => {
     const next = !darkMode;
-    setDarkMode(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("refugio-theme", next ? "dark" : "light");
+    try {
+      const response = await fetch("/api/account", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "preferences", theme: next ? "dark" : "light" }) });
+      if (response.status === 401) window.dispatchEvent(new Event("auth-expired"));
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      applyTheme(data.user.preferences.theme);
+      window.dispatchEvent(new CustomEvent("account-updated", { detail: data.user }));
+    } catch { setNotice("Não foi possível salvar a preferência de aparência."); }
   };
 
   useEffect(() => {

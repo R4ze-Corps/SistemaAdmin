@@ -52,6 +52,15 @@ Não há recuperação de senha nesta versão.
 As coleções `users`, `auth_bootstrap`, `auth_sessions` e `auth_limits` são criadas ao utilizar a autenticação.
 Os dados existentes em `app_state` e os documentos no Blob não são migrados nem apagados.
 
+## Configurações
+
+O botão **Configurações** abre perfil, senha/segurança, aparência, administração e informações do sistema.
+É possível alterar nome/login (mudança de login exige senha atual), trocar senha e encerrar outras sessões.
+Trocar a senha encerra todas as sessões anteriores e emite uma nova para o dispositivo atual.
+O tema claro/escuro/automático é salvo na conta no MongoDB; localStorage mantém apenas um cache visual.
+Administradores também acessam aprovação/bloqueio de contas e o gerenciamento de chalés.
+As APIs de configurações exigem sessão aprovada e validam a origem das alterações.
+
 ## Banco de dados
 
 Copie `.env.example` para `.env.local` e informe a conexão do MongoDB Atlas:
