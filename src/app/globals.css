@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./beta.css";
 :root { --background: #f4f3ed; --foreground: #22322b; }
 body { background: var(--background); color: var(--foreground); }
 

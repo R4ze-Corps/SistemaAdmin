@@ -1,0 +1,81 @@
+/* Every selector is scoped: production keeps its existing styles and markup. */
+.beta-design {
+  --beta-surface: #fffefa;
+  --beta-content: #22322b;
+  --beta-secondary: #536158;
+  --beta-accent: #1f4b3a;
+  --beta-border: #82978b;
+  --beta-signal: #8c301f;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+html.dark .beta-design {
+  --beta-surface: #16221c;
+  --beta-content: #e9f1ec;
+  --beta-secondary: #a8b8ae;
+  --beta-accent: #82c69e;
+  --beta-border: #718078;
+  --beta-signal: #ef9b88;
+}
+.beta-design :is([class~="text-[8px]"], [class~="text-[9px]"]) { font-size: .75rem !important; line-height: 1.5; }
+.beta-design :is([class~="text-[10px]"], [class~="text-[11px]"], [class~="text-[12px]"], .text-xs) { font-size: .875rem !important; line-height: 1.5; }
+.beta-design :is([class~="text-[17px]"], [class~="text-[21px]"]) { font-size: 1.5rem !important; }
+.beta-design.beta-design :is([class~="text-[#46544b]"], [class~="text-[#536158]"], [class~="text-[#58645d]"], [class~="text-[#59655e]"], [class~="text-[#5e6962]"], [class~="text-[#68736c]"], [class~="text-[#69736d]"], [class~="text-[#6d7770]"], [class~="text-[#6f7972]"], [class~="text-[#758078]"], [class~="text-[#768078]"], [class~="text-[#778078]"], [class~="text-[#7a837c]"], [class~="text-[#7c867f]"], [class~="text-[#7d877f]"], [class~="text-[#829087]"], [class~="text-[#879088]"], [class~="text-[#8a928b]"]) { color: var(--beta-secondary) !important; }
+.beta-design.beta-design :is(input, select, textarea) { font-size: 1rem !important; min-height: 3rem; line-height: 1.5; }
+.beta-design :is(button, a, summary, [role="button"]):not([data-beta-day]) { min-height: 2.75rem; }
+.beta-design button:is([class~="w-8"], [class~="w-9"], [class~="w-10"], .beta-dialog-close) { min-width: 2.75rem; }
+.beta-design button:disabled { opacity: .5; cursor: not-allowed; }
+.beta-design :is(button, a, input, select, textarea, summary, [tabindex]):focus-visible { outline: 3px solid var(--beta-accent) !important; outline-offset: 3px; }
+.beta-design [class~="hidden"][class~="sm:inline-flex"] { display: inline-flex; }
+.beta-design [data-beta-day][aria-pressed="true"] { outline: 2px solid var(--beta-accent); outline-offset: 1px; box-shadow: none; }
+.beta-design [data-beta-day].opacity-30 { opacity: 1; color: var(--beta-secondary); background: color-mix(in srgb, var(--beta-surface), var(--beta-secondary) 8%); }
+.beta-design [data-beta-day] { min-width: 0; }
+.beta-design [data-beta-day] > .absolute { display: none; }
+.beta-design .beta-calendar-compact { display: none; }
+.beta-design .beta-save-status, .beta-design .beta-notice, .beta-design .beta-settings-note {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
+  padding: .75rem 1.25rem; color: var(--beta-secondary); font-size: .875rem; background: var(--beta-surface); border-bottom: 1px solid var(--beta-border);
+}
+.beta-design .beta-notice { color: var(--beta-content); border-left: 4px solid var(--beta-accent); }
+.beta-design .beta-settings-note { margin-top: 1rem; border: 1px solid var(--beta-border); border-radius: .75rem; }
+.beta-design .beta-save-status button { color: var(--beta-accent); text-decoration: underline; font-weight: 600; }
+.beta-design .beta-dialog {
+  position: fixed; inset: 0; margin: auto; width: min(45rem, calc(100vw - 2rem)); max-height: min(92dvh, 60rem);
+  overflow-y: auto; border: 1px solid var(--beta-border); border-radius: 1.375rem; padding: 2rem;
+  background: var(--beta-surface); color: var(--beta-content); box-shadow: 0 24px 60px rgb(0 0 0 / .25);
+}
+.beta-design .beta-dialog::backdrop { background: rgb(12 19 16 / .65); }
+.beta-design .beta-dialog h2 { padding-right: 3rem; }
+.beta-design .beta-dialog-close { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; border: 1px solid var(--beta-border); border-radius: .75rem; }
+.beta-design .beta-dialog [class*="grid-cols-"] { min-width: 0; }
+.beta-design .beta-dialog :is(input, select, textarea) { border-color: var(--beta-border) !important; }
+.beta-design .beta-dialog button[class~="text-[#a65746]"] { min-width: 2.75rem; }
+.beta-design .beta-dialog a { min-width: 2.75rem; }
+.beta-design .beta-dialog-feedback { display: flex; align-items: center; gap: 1rem; margin: 3rem 0 1rem; padding: .75rem; border: 1px solid var(--beta-border); border-radius: .75rem; color: var(--beta-content); }
+.beta-design .beta-dialog-feedback span { flex: 1; }
+.beta-design .truncate { overflow-wrap: anywhere; white-space: normal; }
+.beta-design .beta-dialog b.truncate { overflow-wrap: anywhere; white-space: normal; }
+@media (max-width: 767px) {
+  .beta-design .beta-dialog { width: calc(100vw - 1rem); max-height: 95dvh; padding: 1.25rem; }
+  .beta-design .beta-dialog .grid-cols-2 { grid-template-columns: minmax(0, 1fr); }
+  .beta-design .beta-calendar-compact { display: grid; gap: .125rem; margin-top: .5rem; font-size: .75rem; font-weight: 600; }
+  .beta-design [data-beta-day] { padding: .375rem; min-height: 5.5rem; }
+  .beta-design header > div:last-child { flex-wrap: wrap; }
+  .beta-design [class~="grid-cols-[38px_1fr_auto]"] { grid-template-columns: 38px minmax(0, 1fr); }
+  .beta-design [class~="grid-cols-[38px_1fr_auto]"] > span:last-child { grid-column: 2; justify-self: start; }
+  .beta-design [class~="grid-cols-[40px_minmax(0,1fr)_auto]"] { grid-template-columns: 40px minmax(0, 1fr); }
+  .beta-design [class~="grid-cols-[40px_minmax(0,1fr)_auto]"] > div:last-child { grid-column: 1 / -1; flex-wrap: wrap; justify-content: flex-end; }
+  .beta-design section > .flex.items-start.justify-between { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beta-design, .beta-design * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  .beta-design [data-beta-day]:hover { transform: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .beta-design .beta-dialog::backdrop { background: #0c1310; }
+}
+@media (prefers-contrast: more) {
+  .beta-design { --beta-secondary: #22322b; --beta-border: #22322b; }
+  html.dark .beta-design { --beta-secondary: #e9f1ec; --beta-border: #e9f1ec; }
+  .beta-design button, .beta-design a { text-decoration-thickness: 2px; }
+}
