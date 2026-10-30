@@ -7,7 +7,9 @@ const scrypt = (password: string, salt: string) => new Promise<Buffer>((resolve,
   deriveKey(password, salt, 64, { N: 32768, r: 8, p: 3, maxmem: 64 * 1024 * 1024 }, (error, key) => error ? reject(error) : resolve(key));
 });
 const COOKIE = "refugio-session";
-const MAX_AGE = 60 * 60 * 24 * 7;
+// Browsers cap persistent cookies to a finite lifetime. Refresh this one-year
+// cookie whenever its session is used; server sessions themselves do not expire.
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 export type Account = { _id: ObjectId; name: string; username?: string; email?: string; passwordHash: string; preferences?: { theme: "light" | "dark" | "system"; betaTheme?: "light" | "dark" | "system"; betaEnabled?: boolean }; role: "admin" | "member"; status: "pending" | "approved" | "blocked"; createdAt: Date };
 export function normalizeLogin(value: unknown) {
   return typeof value === "string" ? value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase() : "";
@@ -18,7 +20,7 @@ export function validLogin(value: string) {
 export function legacyLoginFilter(username: string) {
   return { username: { $exists: false }, name: { $regex: `^${username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" } };
 }
-type Session = { tokenHash: string; userId: ObjectId; expiresAt: Date };
+type Session = { tokenHash: string; userId: ObjectId; expiresAt?: Date };
 export class AuthError extends Error {
   constructor(message: string, public status: number) { super(message); }
 }
@@ -41,9 +43,20 @@ export async function currentAccount() {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
   const db = await getDatabase();
-  const session = await db.collection<Session>("auth_sessions").findOne({ tokenHash: digest(token), expiresAt: { $gt: new Date() } });
+  const sessions = db.collection<Session>("auth_sessions");
+  const tokenHash = digest(token);
+  const session = await sessions.findOne({ tokenHash, $or: [{ expiresAt: { $gt: new Date() } }, { expiresAt: { $exists: false } }] });
   if (!session) return null;
-  return db.collection<Account>("users").findOne({ _id: session.userId, status: "approved" });
+  // Promote active legacy sessions to persistent sessions on their next request.
+  if (session.expiresAt) {
+    const promoted = await sessions.updateOne({ tokenHash, expiresAt: { $gt: new Date() } }, { $unset: { expiresAt: "" } });
+    if (!promoted.matchedCount) return null;
+  }
+  const user = await db.collection<Account>("users").findOne({ _id: session.userId, status: "approved" });
+  if (!user) return null;
+  // Rolling renewal keeps the browser cookie available across restarts while the account is in use.
+  (await cookies()).set(COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: COOKIE_MAX_AGE });
+  return user;
 }
 export function sameOrigin(request: Request) {
   const origin = request.headers.get("origin");
@@ -64,8 +77,8 @@ export async function createSession(user: Account) {
   await db.collection("auth_sessions").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
   await db.collection("auth_sessions").createIndex({ tokenHash: 1 }, { unique: true });
   const token = randomBytes(32).toString("hex");
-  await db.collection<Session>("auth_sessions").insertOne({ tokenHash: digest(token), userId: user._id, expiresAt: new Date(Date.now() + MAX_AGE * 1000) });
-  (await cookies()).set(COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: MAX_AGE });
+  await db.collection<Session>("auth_sessions").insertOne({ tokenHash: digest(token), userId: user._id });
+  (await cookies()).set(COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: COOKIE_MAX_AGE });
 }
 export async function endSession() {
   const store = await cookies();

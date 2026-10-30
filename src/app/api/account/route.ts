@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 export async function GET() {
   try {
     const user = await authorize();
-    const activeSessions = await (await getDatabase()).collection("auth_sessions").countDocuments({ userId: user._id, expiresAt: { $gt: new Date() } });
+    const activeSessions = await (await getDatabase()).collection("auth_sessions").countDocuments({ userId: user._id, $or: [{ expiresAt: { $gt: new Date() } }, { expiresAt: { $exists: false } }] });
     return Response.json({ user: publicAccount(user), activeSessions }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) { return authFailure(error); }
 }
