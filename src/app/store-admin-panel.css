@@ -1,0 +1,35 @@
+html.dark .store-admin-panel .store-admin-form {
+  color: #f3eee5;
+  background-color: #1c2922 !important;
+  border-color: #3a4c41 !important;
+}
+
+html.dark .store-admin-panel .store-admin-form label,
+html.dark .store-admin-panel .store-admin-form h4 {
+  color: #edf5f0;
+}
+
+html.dark .store-admin-panel .store-admin-form input:not([type="checkbox"]),
+html.dark .store-admin-panel .store-admin-form textarea {
+  color: #f3eee5 !important;
+  background-color: #111c17 !important;
+  border-color: #405248 !important;
+}
+
+html.dark .store-admin-panel .store-admin-form input::placeholder,
+html.dark .store-admin-panel .store-admin-form textarea::placeholder {
+  color: #a8b8ae !important;
+  opacity: 1;
+}
+
+html.dark .store-admin-panel .store-admin-form input[type="checkbox"] {
+  accent-color: #a3d1b4;
+}
+
+html.dark .store-admin-panel [class~="text-[#596258]"] {
+  color: #a8b8ae !important;
+}
+
+html.dark .store-admin-panel [class~="border-[#d8ddd5]"] {
+  border-color: #405248 !important;
+}

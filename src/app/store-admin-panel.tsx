@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ExternalLink, Eye, EyeOff, ImagePlus, Pencil, Plus, Save, Sparkles, Trash2, Wine, X } from "lucide-react";
+import "./store-admin-panel.css";
 
 type Item = { id: string; name: string; description: string; category: string; price: number; imageUrl?: string; available: boolean; featured: boolean };
 type Draft = { name: string; description: string; category: string; price: string; imageUrl: string; available: boolean; featured: boolean };
@@ -61,10 +62,10 @@ export default function StoreAdminPanel({ beta }: { beta: boolean }) {
     finally { setBusy(false); }
   }
 
-  return <div className="mt-6 space-y-6">
+  return <div className="store-admin-panel mt-6 space-y-6">
     <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="flex items-center gap-2 text-lg font-semibold"><Wine size={20} /> Cardápio da adega</h3><p className="mt-1 text-sm leading-6 text-[#596258]">Cadastre os itens que aparecem para os clientes na página pública, sem acesso ao painel.</p></div><a href="/loja" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#b7ccbc] px-4 text-sm font-semibold text-[#1f4b3a]"><ExternalLink size={16} /> Abrir página pública</a></div>
     {beta && <p className="rounded-xl border border-[#e5d1af] bg-[#f7f0e4] p-4 text-sm leading-6 text-[#805b2c]">Catálogo de teste isolado. Os itens deste ambiente não aparecem na loja pública.</p>}
-    <form onSubmit={save} className="grid gap-4 rounded-2xl border border-[#e4e3dc] bg-[#fcfcfa] p-4 sm:grid-cols-2 sm:p-5"><div className="sm:col-span-2 flex items-center justify-between"><h4 className="font-semibold">{editing ? "Editar item" : "Novo item"}</h4>{editing && <button type="button" onClick={reset} className="inline-flex min-h-10 items-center gap-2 px-2 text-sm text-[#596258]"><X size={16} /> Cancelar edição</button>}</div>
+    <form onSubmit={save} className="store-admin-form grid gap-4 rounded-2xl border border-[#e4e3dc] bg-[#fcfcfa] p-4 sm:grid-cols-2 sm:p-5"><div className="sm:col-span-2 flex items-center justify-between"><h4 className="font-semibold">{editing ? "Editar item" : "Novo item"}</h4>{editing && <button type="button" onClick={reset} className="inline-flex min-h-10 items-center gap-2 px-2 text-sm text-[#596258]"><X size={16} /> Cancelar edição</button>}</div>
       <label className="text-sm font-semibold">Nome do item<input className={field} value={draft.name} onChange={event => setDraft({ ...draft, name: event.target.value })} required maxLength={100} placeholder="Ex.: Vinho da Serra" /></label>
       <label className="text-sm font-semibold">Categoria<input className={field} value={draft.category} onChange={event => setDraft({ ...draft, category: event.target.value })} required maxLength={40} placeholder="Vinhos, cafés, petiscos…" /></label>
       <label className="text-sm font-semibold">Preço (R$)<input className={field} type="number" inputMode="decimal" min="0.01" max="1000000" step="0.01" value={draft.price} onChange={event => setDraft({ ...draft, price: event.target.value })} required placeholder="0,00" /></label>
