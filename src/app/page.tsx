@@ -103,6 +103,22 @@ function Dashboard() {
       .catch(() => { if (beta) setSaveStatus("error"); setNotice("Não foi possível carregar os dados do MongoDB. Recarregue a página para tentar novamente; o salvamento está bloqueado para proteger os dados existentes."); });
   }, [scopedFetch, beta]);
   useEffect(() => {
+    const reloadAfterRestore = async () => {
+      try {
+        const response = await scopedFetch("/api/state", { cache: "no-store" });
+        if (!response.ok) throw new Error();
+        const data = await response.json();
+        setCabins(Array.isArray(data.cabins) ? data.cabins : initialCabins);
+        setBookings(Array.isArray(data.bookings) ? data.bookings : initialBookings);
+        setFinanceEntries(Array.isArray(data.financeEntries) ? data.financeEntries : []);
+        setPayables(Array.isArray(data.payables) ? data.payables : []);
+        setNotice("Backup restaurado e painel atualizado.");
+      } catch { setNotice("Backup restaurado no banco. Recarregue o painel para atualizar os dados exibidos."); }
+    };
+    window.addEventListener("backup-restored", reloadAfterRestore);
+    return () => window.removeEventListener("backup-restored", reloadAfterRestore);
+  }, [scopedFetch]);
+  useEffect(() => {
     if (!hydrated) return;
     const version = ++saveVersion.current;
     let cancelled = false;

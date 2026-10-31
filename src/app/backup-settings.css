@@ -1,0 +1,53 @@
+.backup-settings .backup-card,
+.backup-settings .backup-restore-card {
+  color: #22322b;
+  background: #fff;
+}
+
+html.dark .backup-settings .backup-card,
+html.dark .backup-settings .backup-restore-card {
+  color: #edf5f0;
+  background: #16221c;
+  border-color: #314239;
+}
+
+html.dark .backup-settings .backup-summary-card {
+  background: #1b2922;
+}
+
+html.dark .backup-settings .backup-summary-label,
+html.dark .backup-settings .backup-note {
+  color: #b8c6bd;
+}
+
+html.dark .backup-settings .backup-summary-value,
+html.dark .backup-settings h3,
+html.dark .backup-settings label {
+  color: #edf5f0;
+}
+
+html.dark .backup-settings .backup-select,
+html.dark .backup-settings input[type="file"] {
+  color: #edf5f0;
+  background-color: #111c17;
+  border-color: #405248;
+}
+
+html.dark .backup-settings input[type="file"]::file-selector-button {
+  color: #edf5f0;
+  background: #234332;
+}
+
+html.dark .backup-settings .backup-progress-card {
+  color: #edf5f0;
+  background: #142019;
+  border-color: #314239;
+}
+
+html.dark .backup-settings .backup-progress-track {
+  background: #314239;
+}
+
+html.dark .backup-settings .backup-warning {
+  color: #e2c58d;
+}
