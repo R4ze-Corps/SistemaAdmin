@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowUpRight, Coffee, GlassWater, Leaf, Search, Sparkles, Wine, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUpRight, BottleWine, Coffee, GlassWater, Leaf, Search, Sparkles, Wine, X } from "lucide-react";
 
 type Item = { id: string; name: string; description: string; category: string; price: number; imageUrl?: string; featured: boolean };
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -48,7 +48,7 @@ export default function Storefront() {
 
     <section className="store-hero" aria-labelledby="store-title">
       <div className="store-hero-copy"><p className="store-eyebrow"><span /> UM PEQUENO PRAZER, NO SEU TEMPO</p><h1 id="store-title">Sabores que<br /><em>combinam com o refúgio.</em></h1><p className="store-lead">Uma seleção feita para brindar os dias tranquilos e deixar a estadia ainda mais especial.</p><a className="store-hero-link" href="#cardapio">Descobrir o cardápio <ArrowDown size={17} /></a><span className="store-hero-ornament" aria-hidden="true">✳</span></div>
-      <div className="store-feature" aria-label={featured ? `Destaque: ${featured.name}` : "Seleção da adega"}><span className="store-feature-orbit orbit-one" /><span className="store-feature-orbit orbit-two" />{featured?.imageUrl ? <img className="store-feature-image" src={featured.imageUrl} alt="" referrerPolicy="no-referrer" /> : <div className="store-feature-glass" aria-hidden="true"><Wine size={88} strokeWidth={0.8} /></div>}<div className="store-feature-caption"><span><Sparkles size={14} /> ESCOLHA DA CASA</span><strong>{featured?.name || "Um brinde à pausa"}</strong><small>{featured ? money.format(featured.price) : "Sua seleção especial começa aqui"}</small></div><span className="store-feature-seal">feito<br />com<br /><i>calma</i></span></div>
+      <div className="store-feature" aria-label={featured ? `Destaque: ${featured.name}` : "Seleção da adega"}><span className="store-feature-orbit orbit-one" /><span className="store-feature-orbit orbit-two" />{featured?.imageUrl ? <img className="store-feature-image" src={featured.imageUrl} alt="" referrerPolicy="no-referrer" /> : <div className="store-feature-bottles" aria-hidden="true"><BottleWine className="store-bottle-back" /><BottleWine className="store-bottle-front" /></div>}<div className="store-feature-caption"><span><Sparkles size={14} /> ESCOLHA DA CASA</span><strong>{featured?.name || "Um brinde à pausa"}</strong><small>{featured ? money.format(featured.price) : "Sua seleção especial começa aqui"}</small></div></div>
     </section>
 
     <section id="cardapio" className="store-menu" aria-labelledby="menu-title">

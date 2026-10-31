@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Storefront from "./storefront";
 import "./store.css";
+import "./store-adjustments.css";
 
 export const metadata: Metadata = {
   title: "Adega do Chalé | Refúgio",
