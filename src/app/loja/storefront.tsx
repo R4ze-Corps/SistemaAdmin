@@ -5,7 +5,7 @@ import { ArrowDown, ArrowLeft, ArrowUpRight, Coffee, GlassWater, Leaf, Search, S
 
 type Item = { id: string; name: string; description: string; category: string; price: number; imageUrl?: string; featured: boolean };
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-const cellarPhoto = "https://images.pexels.com/photos/18513800/pexels-photo-18513800.jpeg?auto=compress&cs=tinysrgb&w=1000";
+const cellarPhoto = "https://images.pexels.com/photos/17674068/pexels-photo-17674068.jpeg?auto=compress&cs=tinysrgb&w=1200";
 const categoryIcon = (category: string) => {
   const label = category.toLowerCase();
   if (label.includes("vinho") || label.includes("espumante")) return Wine;

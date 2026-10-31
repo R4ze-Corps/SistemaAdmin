@@ -10,10 +10,10 @@
 .store-feature-photo {
   position: relative;
   z-index: 1;
-  width: 62%;
-  height: 70%;
-  max-width: 270px;
-  max-height: 310px;
+  width: 80%;
+  height: 65%;
+  max-width: 350px;
+  max-height: 300px;
   object-fit: cover;
   object-position: center 54%;
   border: 1px solid color-mix(in srgb, var(--store-card) 68%, transparent);
