@@ -18,7 +18,7 @@ type MenuItem = {
 export async function GET() {
   try {
     const items = await (await getDatabase()).collection<MenuItem>("store_menu")
-      .find({ available: true }, { projection: { name: 1, description: 1, category: 1, price: 1, imageUrl: 1, featured: 1 } })
+      .find({ available: true, ownerId: { $exists: false } }, { projection: { name: 1, description: 1, category: 1, price: 1, imageUrl: 1, featured: 1 } })
       .sort({ featured: -1, category: 1, name: 1 }).toArray();
     return Response.json({ items: items.map(({ _id, ...item }) => ({ id: String(_id), ...item })) }, { headers: { "Cache-Control": "no-store" } });
   } catch {

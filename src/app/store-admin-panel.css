@@ -26,6 +26,48 @@ html.dark .store-admin-panel .store-admin-form input[type="checkbox"] {
   accent-color: #a3d1b4;
 }
 
+.store-admin-panel .ios-toggle-row {
+  position: relative;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  font-weight: 400;
+}
+.store-admin-panel .ios-toggle-row input {
+  position: absolute;
+  right: 0;
+  width: 48px;
+  height: 28px;
+  margin: 0;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: #d4d8d3;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+.store-admin-panel .ios-toggle-row input:checked { background: #34a853; }
+.store-admin-panel .ios-toggle-row input:focus-visible { outline: 3px solid #9bc7a9; outline-offset: 2px; }
+.store-admin-panel .ios-toggle-row i {
+  position: absolute;
+  right: 23px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px #0003;
+  pointer-events: none;
+  transition: transform .2s ease;
+}
+.store-admin-panel .ios-toggle-row input:checked + i { transform: translateX(20px); }
+html.dark .store-admin-panel .ios-toggle-row input { background: #47564c; }
+html.dark .store-admin-panel .ios-toggle-row input:checked { background: #34a853; }
+@media (prefers-reduced-motion: reduce) {
+  .store-admin-panel .ios-toggle-row input, .store-admin-panel .ios-toggle-row i { transition: none; }
+}
+
 html.dark .store-admin-panel [class~="text-[#596258]"] {
   color: #a8b8ae !important;
 }

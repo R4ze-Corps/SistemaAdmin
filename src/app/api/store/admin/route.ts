@@ -20,9 +20,10 @@ function inputFrom(body: unknown): MenuInput {
   if (description.length > 500) throw new Error("A descrição pode ter até 500 caracteres.");
   if (!category || category.length > 40) throw new Error("Informe uma categoria com até 40 caracteres.");
   if (!Number.isFinite(price) || price <= 0 || price > 1_000_000) throw new Error("Informe um preço válido.");
-  if (imageUrl.length > 2000 || (imageUrl && (!/^https:\/\//i.test(imageUrl) || !URL.canParse(imageUrl)))) throw new Error("A imagem precisa usar um endereço HTTPS válido.");
+  const storedImage = /^\/api\/store\/images\/[a-f0-9]{24}$/i.test(imageUrl);
+  if (imageUrl.length > 2000 || (imageUrl && !storedImage && (!/^https:\/\//i.test(imageUrl) || !URL.canParse(imageUrl)))) throw new Error("Use um endereço HTTPS válido ou envie uma imagem do computador.");
   if (typeof value.available !== "boolean" || typeof value.featured !== "boolean") throw new Error("Escolha a disponibilidade e o destaque do item.");
-  return { name, description, category, price, ...(imageUrl ? { imageUrl } : {}), available: value.available, featured: value.featured };
+  return { name, description, category, price, imageUrl, available: value.available, featured: value.featured };
 }
 
 function criteria(user: Awaited<ReturnType<typeof authorize>>, beta: boolean) {
