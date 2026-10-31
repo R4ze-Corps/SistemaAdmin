@@ -59,8 +59,6 @@ export default function Storefront() {
       </button>; })}</div> : <div className="store-empty">{items.length ? "Nenhum item corresponde a essa busca." : "A seleção está sendo preparada. Volte em breve para conhecer as opções da adega."}</div>}
     </section>
 
-    <footer className="store-footer"><span className="store-footer-mark"><Wine size={16} /></span><span>Refúgio <i>·</i> bons momentos, sem pressa.</span><a href="#cardapio">Voltar ao início <ArrowUpRight size={13} /></a></footer>
-
     <dialog ref={dialog} className="store-dialog" onClick={event => { if (event.target === dialog.current) setSelected(null); }} onClose={() => setSelected(null)} aria-label={selected?.name || "Detalhes do item"}>
       {selected && <article className="store-detail"> <button className="store-detail-close" type="button" onClick={() => setSelected(null)} aria-label="Fechar detalhes"><X size={18} /></button><div className="store-detail-art">{selected.imageUrl ? <img src={selected.imageUrl} alt="" referrerPolicy="no-referrer" /> : (() => { const Icon = categoryIcon(selected.category); return <Icon size={64} strokeWidth={1} />; })()}</div><div className="store-detail-copy"><p className="store-eyebrow">{selected.category}</p><h2>{selected.name}</h2><p>{selected.description || "Uma escolha especial para aproveitar sem pressa."}</p><strong>{money.format(selected.price)}</strong><button type="button" onClick={() => setSelected(null)}><ArrowLeft size={16} /> Voltar ao cardápio</button></div></article>}
     </dialog>

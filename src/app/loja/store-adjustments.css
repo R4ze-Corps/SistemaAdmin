@@ -11,6 +11,7 @@
   border-radius: 0;
   box-shadow: none;
   filter: drop-shadow(0 16px 25px color-mix(in srgb, var(--store-ink) 26%, transparent));
+  clip-path: ellipse(48% 48% at 50% 50%);
 }
 
 .store-feature-caption { bottom: -12%; }
