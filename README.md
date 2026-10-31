@@ -87,8 +87,10 @@ Nunca versione `.env` ou `.env.local`. A rota `GET /api/health` confirma a conex
 
 1. Envie este repositório para GitHub, GitLab ou Bitbucket.
 2. Importe o repositório na Vercel.
-3. Cadastre `MONGODB_URI`, `MONGODB_DB` e `BLOB_READ_WRITE_TOKEN` nas variáveis de ambiente do projeto.
+3. Cadastre `MONGODB_URI`, `MONGODB_DB` e `BLOB_READ_WRITE_TOKEN` nas variáveis de ambiente do projeto. Para proteger o backup agendado, cadastre também `CRON_SECRET` em Production com um valor aleatório de pelo menos 16 caracteres.
 4. Faça o deploy.
+
+O cron diário definido em `vercel.json` verifica a frequência de backup escolhida pelo administrador. Ao alterar as variáveis de ambiente ou o código, aguarde o novo deployment de Production concluir antes de validar a aplicação.
 
 Antes de publicar, valide com:
 
