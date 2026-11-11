@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { authorize, authFailure } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
 import { workspaceFor } from "@/lib/workspace";
+import { sectionForLegacyItem } from "@/lib/store-menu";
 
 export const runtime = "nodejs";
 
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
     const workspace = workspaceFor(user, request.headers.get("x-refugio-mode"));
     const beta = workspace.mode === "beta";
     const items = await (await getDatabase()).collection<MenuItem>("store_menu").find(criteria(user, beta)).sort({ updatedAt: -1, name: 1 }).toArray();
-    return Response.json({ items: items.map(({ _id, ...item }) => ({ id: _id?.toHexString(), ...item })) }, { headers: { "Cache-Control": "no-store" } });
+    return Response.json({ items: items.map(({ _id, ...item }) => ({ id: _id?.toHexString(), ...item, section: item.section ?? sectionForLegacyItem(item.name, item.category) })) }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) { return authFailure(error); }
 }
 

@@ -2,6 +2,7 @@ import { gunzipSync } from "node:zlib";
 import { ObjectId } from "mongodb";
 import { AuthError, authorize, authFailure } from "@/lib/auth";
 import { getDatabase, getMongoClient } from "@/lib/mongodb";
+import { sectionForLegacyItem } from "@/lib/store-menu";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -30,7 +31,7 @@ function parseBackup(value: unknown) {
     const imageUrl = typeof entry.imageUrl === "string" ? entry.imageUrl : "";
     if (imageUrl && !(/^https:\/\//i.test(imageUrl) && URL.canParse(imageUrl)) && !/^\/api\/store\/images\/[a-f0-9]{24}$/i.test(imageUrl)) throw new AuthError("O backup contém um endereço de imagem inválido.", 400);
     const originalId = typeof entry.id === "string" && ObjectId.isValid(entry.id) ? new ObjectId(entry.id) : new ObjectId();
-    return { _id: originalId, name: entry.name.trim(), category: entry.category.trim(), section: entry.section === "products" ? "products" : "wine", description: entry.description, price: entry.price, ...(imageUrl ? { imageUrl } : {}), available: entry.available, featured: entry.featured, createdAt: dateOrNow(entry.createdAt), updatedAt: dateOrNow(entry.updatedAt) };
+    return { _id: originalId, name: entry.name.trim(), category: entry.category.trim(), section: entry.section === "products" || entry.section === "wine" ? entry.section : sectionForLegacyItem(entry.name, entry.category), description: entry.description, price: entry.price, ...(imageUrl ? { imageUrl } : {}), available: entry.available, featured: entry.featured, createdAt: dateOrNow(entry.createdAt), updatedAt: dateOrNow(entry.updatedAt) };
   });
   return { appState, menu, counts: { cabins: appState.cabins.length, bookings: appState.bookings.length, financeEntries: appState.financeEntries.length, payables: appState.payables.length, menuItems: menu.length } };
 }
