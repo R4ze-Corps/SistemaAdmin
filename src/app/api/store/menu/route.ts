@@ -8,7 +8,7 @@ type MenuItem = {
   name: string;
   description: string;
   category: string;
-  section?: "wine" | "products";
+  section?: "wine" | "products" | "services";
   price: number;
   imageUrl?: string;
   available: boolean;
