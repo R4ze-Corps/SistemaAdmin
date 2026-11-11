@@ -79,7 +79,7 @@ export default function Storefront() {
   return <main className={`store-page store-page-redesign store-section-${section}`}>
     <header className="store-topbar">
       <button type="button" className="store-topbar-icon" onClick={searchFromHeader} aria-label="Buscar na loja"><Search size={21} /></button>
-      <a className="store-topbar-brand" href="#inicio" aria-label="Matto Chalés — início"><img src="/assets/matto-chales-logo.png" alt="Matto Chalés" /></a>
+      <a className="store-topbar-brand" href="#inicio" aria-label="Matto Chalés — início"><img src="/assets/matto-chales-logo.png" alt="" /><span>MATTO CHALÉS<small>REFÚGIO · SERRA DA MANTIQUEIRA</small></span></a>
       <button type="button" className="store-topbar-icon store-menu-trigger" aria-label="Abrir navegação da loja" aria-expanded={menuOpen} aria-controls="store-drawer" onClick={() => setMenuOpen(true)}><MenuIcon size={21} /></button>
     </header>
     <button type="button" className={`store-drawer-scrim ${menuOpen ? "is-open" : ""}`} aria-label="Fechar menu" tabIndex={menuOpen ? 0 : -1} onClick={() => setMenuOpen(false)} />
