@@ -2,6 +2,15 @@
 @import "./beta.css";
 :root { --background: #f4f3ed; --foreground: #22322b; }
 body { background: var(--background); color: var(--foreground); }
+/* Keep scrolling functional while hiding browser and nested element scrollbars. */
+html, body, * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
+html::-webkit-scrollbar-corner, body::-webkit-scrollbar-corner, *::-webkit-scrollbar-corner {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
 
 html { color-scheme: light; }
 html.dark { color-scheme: dark; --background: #0c1310; --foreground: #e9f1ec; }
