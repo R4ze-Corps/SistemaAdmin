@@ -388,10 +388,10 @@ function GuestStepper({ value, onChange, dark }: { value: number; onChange: (val
   };
   return <div role="spinbutton" tabIndex={0} aria-label="Quantidade de pessoas" aria-valuenow={value} aria-valuemin={min} aria-valuemax={max} onKeyDown={onKeyDown} className={`flex h-10 w-full items-center justify-between rounded-lg border border-[#dcded8] bg-white px-3 text-xs outline-none transition focus-within:border-[#75a385] ${dark ? "text-white" : "text-[#243129]"} focus-visible:ring-2 focus-visible:ring-[#75a385]/30`}>
     <output aria-hidden="true" className="min-w-5 font-semibold tabular-nums">{value}</output>
-    <div className="inline-flex h-7 overflow-hidden rounded-full border border-[#dcded8] bg-[#f5f7f4]">
-      <button type="button" tabIndex={-1} aria-label="Diminuir quantidade" disabled={value <= min} onPointerDown={(event) => press(event, -1)} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop} className="flex w-8 items-center justify-center text-sm transition hover:bg-[#e9eee9] active:bg-[#dfe8e0] disabled:cursor-not-allowed disabled:opacity-35">−</button>
-      <span aria-hidden="true" className="my-1 w-px bg-[#dcded8]" />
-      <button type="button" tabIndex={-1} aria-label="Aumentar quantidade" disabled={value >= max} onPointerDown={(event) => press(event, 1)} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop} className="flex w-8 items-center justify-center text-sm transition hover:bg-[#e9eee9] active:bg-[#dfe8e0] disabled:cursor-not-allowed disabled:opacity-35">+</button>
+    <div className="inline-flex h-6 overflow-hidden rounded-full border border-white/25 bg-white/10 text-white/90 shadow-inner backdrop-blur-md">
+      <button type="button" tabIndex={-1} aria-label="Diminuir quantidade" disabled={value <= min} onPointerDown={(event) => press(event, -1)} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop} className="flex w-6 items-center justify-center text-xs transition hover:bg-white/15 active:bg-white/25 disabled:cursor-not-allowed disabled:opacity-35">−</button>
+      <span aria-hidden="true" className="my-1 w-px bg-white/25" />
+      <button type="button" tabIndex={-1} aria-label="Aumentar quantidade" disabled={value >= max} onPointerDown={(event) => press(event, 1)} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop} className="flex w-6 items-center justify-center text-xs transition hover:bg-white/15 active:bg-white/25 disabled:cursor-not-allowed disabled:opacity-35">+</button>
     </div>
   </div>;
 }
