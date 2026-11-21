@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
-export type GlassTabOption<T extends string> = { value: T; label: string; icon: React.ReactNode };
+export type GlassTabOption<T extends string> = { value: T; label: string; icon?: React.ReactNode };
 
 /** Compact glass tab rail with a shared, spring-like indicator. */
 export default function GlassTabs<T extends string>({
@@ -62,7 +62,7 @@ export default function GlassTabs<T extends string>({
         tabIndex={value === option.value ? 0 : -1}
         className="glass-tabs-trigger"
         onClick={() => onValueChange(option.value)}
-      >{option.icon}<span>{option.label}</span></button>)}
+      >{option.icon}{option.label}</button>)}
     </div>
   </div>;
 }
