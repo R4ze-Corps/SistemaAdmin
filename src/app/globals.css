@@ -95,6 +95,11 @@ html.dark input::placeholder, html.dark textarea::placeholder { color: #718078; 
 html.dark option { background-color: #111c17; color: #e9f1ec; }
 html.dark .shadow-xl, html.dark .shadow-2xl { box-shadow: 0 24px 60px rgba(0,0,0,.48) !important; }
 
-/* Subtle green base tint below the WebsiteGlass refractive lens. */
-.selected-booking-glass { border-color: rgba(91, 133, 108, .28) !important; background: rgba(229, 245, 235, .18) !important; }
-html.dark .selected-booking-glass { border-color: rgba(166, 205, 183, .22) !important; background: rgba(24, 45, 35, .28) !important; }
+/* Green tint and legible text for the WebsiteGlass card component. */
+.selected-booking-glass { border-color: rgba(91, 133, 108, .28) !important; background: rgba(229, 245, 235, .18) !important; color: #22322b !important; }
+html.dark .selected-booking-glass { border-color: rgba(166, 205, 183, .22) !important; background: rgba(24, 45, 35, .28) !important; color: #e9f1ec !important; }
+.selected-booking-header { margin-bottom: 0 !important; display: flex !important; flex-direction: row !important; align-items: flex-start !important; justify-content: space-between !important; gap: .75rem !important; }
+.selected-booking-eyebrow { margin: 0 !important; color: #758078 !important; font-size: 8px !important; font-weight: 700 !important; letter-spacing: .13em !important; }
+html.dark .selected-booking-eyebrow { color: #a8b8ae !important; }
+.selected-booking-title { margin: .25rem 0 0 !important; color: inherit !important; font-size: .875rem !important; font-weight: 700 !important; }
+.selected-booking-content { color: inherit !important; font-size: 10px !important; }
