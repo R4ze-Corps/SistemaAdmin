@@ -65,17 +65,11 @@
   transition: border-color .2s ease, background-color .2s ease, color .2s ease;
 }
 .booking-option-switch.is-on { border-color: #b9d5c2; background: #f0f7f2; color: #1f4b3a; }
-.booking-option-label { min-width: 0; display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; }
+.booking-option-label { min-width: 0; display: inline-flex; flex: 1 1 auto; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; }
 .booking-option-label svg { flex: 0 0 auto; }
-.booking-option-switch .glass-switch-track {
-  position: relative;
-  inset: auto;
-  display: block;
-  flex: 0 0 56px;
-  width: 56px;
-  min-width: 56px;
-  height: 32px;
-}
+
+.booking-option-control { flex: 0 0 56px; }
+
 
 .store-admin-panel .ios-toggle-row { min-height: 44px; display: flex; align-items: center; gap: 9px; font-weight: 400; }
 .store-admin-panel .ios-toggle-row > span { flex: 1; }
