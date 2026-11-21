@@ -18,6 +18,7 @@
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
+.glass-switch[data-size="sm"] { min-width: 44px; }
 .glass-switch:focus-visible { box-shadow: 0 0 0 3px rgb(108 159 126 / 36%); }
 .glass-switch:disabled { opacity: .5; cursor: not-allowed; }
 .glass-switch-track {
@@ -71,10 +72,8 @@
 .booking-option-label svg { flex: 0 0 auto; }
 
 .booking-option-control {
-  flex: 0 0 56px;
+  flex: 0 0 44px;
   margin-left: auto;
-  transform: scale(.82);
-  transform-origin: right center;
 }
 
 

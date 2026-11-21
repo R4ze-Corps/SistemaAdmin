@@ -7,9 +7,8 @@ function cn(...classes: Array<string | undefined | false>) { return classes.filt
 
 const TRACK_W = 56;
 const TRACK_H = 32;
-const THUMB = 26;
-const PAD = (TRACK_H - THUMB) / 2;
-const TRAVEL = TRACK_W - THUMB - PAD * 2;
+const THUMB_W = 26;
+const DEFAULT_THUMB_H = 26;
 
 // gel deformation tuning
 const DEFORM_GAIN = 0.0026;   // velocity → deform
@@ -17,11 +16,12 @@ const DEFORM_EXP = 0.7;
 const DEFORM_CAP = 0.34;
 const HOLD_BOOST = 0.14;      // slight squish while held even when still
 
-interface GlassSwitchProps extends Omit<ComponentProps<"button">, "onChange"> {
+interface GlassSwitchProps extends Omit<ComponentProps<"button">, "onChange" | "size"> {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   ariaLabel?: string;
+  size?: "default" | "sm";
 }
 
 export function GlassSwitch({
@@ -29,16 +29,23 @@ export function GlassSwitch({
   defaultChecked = false,
   onCheckedChange,
   ariaLabel = "Toggle",
+  size = "default",
   className,
   ...props
 }: GlassSwitchProps) {
   const dark = useGlassDark();
   const isControlled = controlled !== undefined;
+  const trackWidth = size === "sm" ? 44 : TRACK_W;
+  const trackHeight = size === "sm" ? 20 : TRACK_H;
+  const thumbWidth = THUMB_W;
+  const thumbHeight = size === "sm" ? 16 : DEFAULT_THUMB_H;
+  const pad = (trackHeight - thumbHeight) / 2;
+  const travel = trackWidth - thumbWidth - pad * 2;
   const [internal, setInternal] = useState(defaultChecked);
   const on = isControlled ? controlled : internal;
 
   // animated values
-  const pos = useRef(new Track(on ? TRAVEL : 0));   // thumb x
+  const pos = useRef(new Track(on ? travel : 0));   // thumb x
   const lift = useRef(new Track(0));                // press progress 0..1
   const deform = useRef(new Track(0));              // gel squish 0..~0.34
 
@@ -92,11 +99,11 @@ export function GlassSwitch({
   // sync to external state when idle
   useEffect(() => {
     if (!pressed.current) {
-      if (reduceMotion()) pos.current.snap(on ? TRAVEL : 0);
-      else spring(pos.current, () => (on ? TRAVEL : 0), { tension: 340, friction: 24 });
+      if (reduceMotion()) pos.current.snap(on ? travel : 0);
+      else spring(pos.current, () => (on ? travel : 0), { tension: 340, friction: 24 });
       runDeform();
     }
-  }, [on]);
+  }, [on, travel]);
 
   const onDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -112,7 +119,7 @@ export function GlassSwitch({
     const dx = e.clientX - drag.current.startX;
     if (Math.abs(dx) > 3) drag.current.moved = true;
     const raw = drag.current.from + dx;
-    const c = clamp(raw, 0, TRAVEL);
+    const c = clamp(raw, 0, travel);
     pos.current.push(c + overdrag(raw - c, 26));  // velocity sampled here → feeds gel
   };
 
@@ -120,10 +127,10 @@ export function GlassSwitch({
     onCheckedChange?.(next);
     glide(lift.current, 0, 0.42, easeSoft);
     if (isControlled) {
-      spring(pos.current, () => (on ? TRAVEL : 0), { tension: 320, friction: 22 });
+      spring(pos.current, () => (on ? travel : 0), { tension: 320, friction: 22 });
     } else {
       setInternal(next);
-      spring(pos.current, () => (next ? TRAVEL : 0), { tension: 320, friction: 22 });
+      spring(pos.current, () => (next ? travel : 0), { tension: 320, friction: 22 });
     }
     runDeform();
   };
@@ -134,7 +141,7 @@ export function GlassSwitch({
     const d = drag.current;
     drag.current = null;
     void e;
-    const next = d?.moved ? pos.current.get() > TRAVEL / 2 : !on;
+    const next = d?.moved ? pos.current.get() > travel / 2 : !on;
     settle(next);
   };
 
@@ -143,7 +150,7 @@ export function GlassSwitch({
     pressed.current = false;
     drag.current = null;
     glide(lift.current, 0, 0.42, easeSoft);
-    spring(pos.current, () => (on ? TRAVEL : 0), { tension: 320, friction: 24 });
+    spring(pos.current, () => (on ? travel : 0), { tension: 320, friction: 24 });
     runDeform();
   };
 
@@ -160,8 +167,9 @@ export function GlassSwitch({
       role="switch"
       aria-checked={on}
       aria-label={ariaLabel}
-      className={cn("relative touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50", className)}
-      style={{ width: TRACK_W, height: TRACK_H }}
+      data-size={size}
+      className={cn("glass-switch relative touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50", className)}
+      style={{ width: trackWidth, height: trackHeight }}
       onPointerDown={onDown}
       onPointerMove={onMove}
       onPointerUp={onUp}
@@ -179,12 +187,12 @@ export function GlassSwitch({
         aria-hidden
         className="absolute rounded-full will-change-transform"
         style={{
-          top: PAD,
-          left: PAD,
-          width: THUMB,
-          height: THUMB,
+          top: pad,
+          left: pad,
+          width: thumbWidth,
+          height: thumbHeight,
           transformOrigin: "center",
-          transform: `translateX(${on ? TRAVEL : 0}px)`,
+          transform: `translateX(${on ? travel : 0}px)`,
         }}
       >
         <span
@@ -193,7 +201,7 @@ export function GlassSwitch({
           style={{ background: "white", boxShadow: "0 2px 6px rgba(0,0,0,0.28), 0 0 0 0.5px rgba(0,0,0,0.04)" }}
         />
         <span ref={glass} className="absolute inset-0 rounded-full" style={{ opacity: 0 }}>
-          <GlassLens width={THUMB} height={THUMB} radius={999} strength={0.7} blur={1} dome={0.35} />
+          <GlassLens width={thumbWidth} height={thumbHeight} radius={999} strength={0.7} blur={1} dome={0.35} />
         </span>
       </span>
     </button>
