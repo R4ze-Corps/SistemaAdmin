@@ -54,6 +54,8 @@
 .glass-switch:active .glass-switch-thumb-lens { opacity: 1; transform: scale(1.02); }
 
 .booking-option-switch {
+  display: flex;
+  align-items: center;
   width: 100%;
   min-height: 48px;
   padding: 0 10px;
@@ -68,7 +70,12 @@
 .booking-option-label { min-width: 0; display: inline-flex; flex: 1 1 auto; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; }
 .booking-option-label svg { flex: 0 0 auto; }
 
-.booking-option-control { flex: 0 0 56px; }
+.booking-option-control {
+  flex: 0 0 56px;
+  margin-left: auto;
+  transform: scale(.82);
+  transform-origin: right center;
+}
 
 
 .store-admin-panel .ios-toggle-row { min-height: 44px; display: flex; align-items: center; gap: 9px; font-weight: 400; }
