@@ -10,11 +10,13 @@ export default function GlassTabs<T extends string>({
   onValueChange,
   options,
   label = "Seções do painel",
+  tint = 0.35,
 }: {
   value: T;
   onValueChange: (value: T) => void;
   options: GlassTabOption<T>[];
   label?: string;
+  tint?: number;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const triggerRefs = useRef(new Map<T, HTMLButtonElement>());
@@ -47,7 +49,8 @@ export default function GlassTabs<T extends string>({
     }
   }
 
-  return <div className="glass-tabs" role="tablist" aria-label={label} onKeyDown={handleKeyDown}>
+  const safeTint = Math.max(0, Math.min(1, tint));
+  return <div className="glass-tabs" style={{ "--glass-tab-surface-opacity": safeTint * 0.2, "--glass-tab-dark-opacity": safeTint * 0.34 } as React.CSSProperties} role="tablist" aria-label={label} onKeyDown={handleKeyDown}>
     <span aria-hidden="true" className={`glass-tabs-indicator ${indicator.ready ? "is-ready" : ""}`} style={{ width: indicator.width, transform: `translateX(${indicator.x}px)` }} />
     <div className="glass-tabs-list" ref={listRef}>
       {options.map(option => <button

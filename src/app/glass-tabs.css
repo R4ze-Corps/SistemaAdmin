@@ -9,7 +9,7 @@
   isolation: isolate;
   border: 1px solid rgb(31 75 58 / 10%);
   border-radius: 9999px;
-  background: rgb(31 75 58 / 7%);
+  background: rgb(31 75 58 / var(--glass-tab-surface-opacity, .07));
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 56%), 0 4px 14px rgb(26 55 39 / 5%);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
   backdrop-filter: blur(18px) saturate(150%);
@@ -59,7 +59,7 @@ html.dark .glass-tabs {
   --glass-tab-ink: #e9f1ec;
   --glass-tab-muted: #9caf9f;
   border-color: rgb(210 232 217 / 11%);
-  background: rgb(10 20 14 / 34%);
+  background: rgb(10 20 14 / var(--glass-tab-dark-opacity, .34));
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 4px 16px rgb(0 0 0 / 15%);
 }
 html.dark .glass-tabs-indicator {
