@@ -39,8 +39,8 @@
 .glass-schedule-day-number { font-weight: 700; }
 .glass-schedule-day-dots { position: absolute; top: .1rem; right: .1rem; display: flex; gap: .2rem; }
 .glass-schedule-day-dots i { width: .38rem; height: .38rem; border-radius: 999px; }
-.glass-calendar-schedule .calendar-reservation-preview { position: absolute; z-index: 2; top: auto; right: 0; bottom: 0; left: 0; display: grid; gap: .1rem; box-sizing: border-box; width: 100%; padding: .12rem; border: 1px solid rgba(255,255,255,.2); border-radius: .45rem; background: rgba(20,35,28,.72); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); -webkit-backdrop-filter: blur(12px) saturate(145%); backdrop-filter: blur(12px) saturate(145%); opacity: 1; visibility: visible; pointer-events: none; transform: none; }
-.glass-calendar-schedule .calendar-reservation-preview-item { display: block; min-width: 0; overflow: hidden; padding: .12rem .3rem; border: 1px solid rgba(255,255,255,.12); font-size: .56rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.glass-calendar-schedule .calendar-reservation-preview { position: absolute; z-index: 2; top: auto; right: 0; bottom: 0; left: 0; display: grid; gap: .12rem; box-sizing: border-box; width: 100%; padding: .2rem; border: 1px solid rgba(255,255,255,.2); border-radius: .5rem; background: rgba(20,35,28,.72); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); -webkit-backdrop-filter: blur(12px) saturate(145%); backdrop-filter: blur(12px) saturate(145%); opacity: 1; visibility: visible; pointer-events: none; transform: none; }
+.glass-calendar-schedule .calendar-reservation-preview-item { display: block; min-width: 0; overflow: hidden; padding: .2rem .4rem; border: 1px solid rgba(255,255,255,.12); border-radius: .25rem; font-size: .62rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .glass-calendar-schedule .calendar-reservation-preview-more { color: #b6c8bc; background: rgba(255,255,255,.08); }
 .glass-month-trigger { justify-content: flex-start; }
 .glass-month-popover { max-width: calc(100vw - 1rem); }
