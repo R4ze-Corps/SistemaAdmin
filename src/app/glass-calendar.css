@@ -1,0 +1,72 @@
+.glass-calendar { width: 100%; color: #26372e; }
+.glass-calendar-root { width: 100%; }
+.glass-calendar-months, .glass-calendar-month { width: 100%; }
+.glass-calendar-month { position: relative; }
+.glass-calendar-caption { display: flex; height: 2.5rem; align-items: center; justify-content: center; }
+.glass-calendar-caption-label { color: inherit; font-size: .9rem; font-weight: 700; text-transform: capitalize; }
+.glass-calendar-nav { position: absolute; top: .2rem; right: 0; z-index: 2; display: flex; gap: .25rem; }
+.glass-calendar-nav-button { display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid transparent; border-radius: 999px; color: inherit; background: transparent; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.glass-calendar-nav-button:hover { background: rgba(31,75,58,.1); border-color: rgba(31,75,58,.14); }
+.glass-calendar-nav-button svg { width: 1rem; height: 1rem; }
+.glass-calendar-grid { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: .15rem .2rem; }
+.glass-calendar-weekday { padding: .3rem 0; color: #718078; font-size: .65rem; font-weight: 700; text-align: center; text-transform: uppercase; }
+.glass-calendar-day { position: relative; padding: .05rem; text-align: center; }
+.glass-calendar-day-button { display: grid; width: 2.15rem; height: 2.15rem; margin: 0 auto; place-items: center; border: 1px solid transparent; border-radius: 999px; color: inherit; background: transparent; font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer; transition: color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease; }
+.glass-calendar-day-button:hover { background: rgba(31,75,58,.1); }
+.glass-calendar-day-button:focus-visible, .glass-calendar-nav-button:focus-visible, .glass-month-grid button:focus-visible { outline: 2px solid #68a07d; outline-offset: 2px; }
+.glass-calendar-day-button[data-today="true"]:not([data-selected-single="true"]) { border-color: #68a07d; color: #347053; }
+.glass-calendar-day-button[data-selected-single="true"] { color: white; background: #246247; box-shadow: 0 4px 12px rgba(31,75,58,.24); }
+.glass-calendar-outside .glass-calendar-day-button { color: #9ba89f; }
+.glass-calendar-today:not(.glass-calendar-outside) .glass-calendar-day-button[data-selected-single="true"] { color: white; }
+.glass-calendar-trigger { display: flex; width: 100%; min-width: 0; height: 2.5rem; align-items: center; justify-content: space-between; gap: .65rem; padding: 0 .75rem; border: 1px solid rgba(64,99,77,.3); border-radius: .8rem; color: #26372e; background: rgba(255,255,255,.48); box-shadow: inset 0 1px 0 rgba(255,255,255,.65); font: inherit; font-size: .8rem; text-align: left; cursor: pointer; -webkit-backdrop-filter: blur(12px) saturate(145%); backdrop-filter: blur(12px) saturate(145%); transition: border-color .16s ease, background .16s ease, box-shadow .16s ease; }
+.glass-calendar-trigger:hover, .glass-calendar-trigger[aria-expanded="true"] { border-color: rgba(64,99,77,.52); background: rgba(255,255,255,.68); box-shadow: 0 5px 18px rgba(25,45,33,.1), inset 0 1px 0 rgba(255,255,255,.7); }
+.glass-calendar-trigger:focus-visible { outline: 2px solid #68a07d; outline-offset: 2px; }
+.glass-calendar-trigger svg { flex: 0 0 auto; color: #587364; }
+.glass-calendar-popover { position: fixed; z-index: 120; overflow: visible; padding: .65rem; border: 1px solid rgba(255,255,255,.3); border-radius: 1.1rem; color: #e9f1ec; background: rgba(19,35,27,.88); box-shadow: 0 18px 48px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); -webkit-backdrop-filter: blur(24px) saturate(155%); backdrop-filter: blur(24px) saturate(155%); animation: glass-calendar-in .16s ease-out both; }
+.glass-calendar-popover .glass-calendar-day-button[data-selected-single="true"] { color: #193629; background: #c6e8d1; }
+.glass-calendar-schedule .glass-calendar-caption { display: none; }
+.glass-calendar-schedule .glass-calendar-nav { display: none; }
+.glass-calendar-schedule .glass-calendar-grid { border-spacing: .35rem .4rem; }
+.glass-calendar-schedule .glass-calendar-weekday { padding: .35rem .5rem; text-align: left; }
+.glass-calendar-schedule .glass-calendar-day { height: 5rem; padding: 0; vertical-align: top; }
+.glass-calendar-schedule .glass-calendar-day-button { position: relative; z-index: 0; display: block; width: 100%; height: 100%; min-height: 5rem; margin: 0; padding: .55rem; overflow: visible; border: 1px solid rgba(94,143,112,.48); border-radius: .8rem; color: #e9f1ec; background: rgba(28,48,38,.58); font-size: .78rem; text-align: left; }
+.glass-calendar-schedule .glass-calendar-day-button:hover { z-index: 20; background: rgba(55,89,68,.62); transform: translateY(-1px); }
+.glass-calendar-schedule .glass-calendar-day-button[data-selected-single="true"] { z-index: 1; color: #f7fff9; border-color: #68a07d; background: rgba(41,91,64,.68); box-shadow: inset 0 0 0 1px rgba(142,200,161,.15); }
+.glass-calendar-schedule .glass-calendar-day-button[data-selected-single="true"]:is(:hover, :focus-visible) { z-index: 30; }
+.glass-calendar-schedule .glass-calendar-outside .glass-calendar-day-button { color: #708077; border-color: rgba(94,143,112,.2); background: rgba(16,28,22,.32); }
+.glass-calendar-schedule .glass-calendar-day-button:focus-visible { z-index: 30; outline-offset: 1px; }
+.glass-schedule-day-content { position: relative; display: flex; min-height: 100%; flex-direction: column; align-items: flex-start; gap: .25rem; }
+.glass-schedule-day-number { font-weight: 700; }
+.glass-schedule-day-dots { position: absolute; top: .1rem; right: .1rem; display: flex; gap: .2rem; }
+.glass-schedule-day-dots i { width: .38rem; height: .38rem; border-radius: 999px; }
+.glass-calendar-schedule .calendar-reservation-preview { top: calc(100% + .25rem); left: 0; width: max-content; min-width: 9rem; max-width: min(14rem, calc(100vw - 1.5rem)); padding: .4rem; }
+.glass-calendar-schedule .calendar-reservation-preview { pointer-events: auto; }
+.glass-calendar-schedule .glass-calendar-day-button[data-calendar-column="5"] .calendar-reservation-preview, .glass-calendar-schedule .glass-calendar-day-button[data-calendar-column="6"] .calendar-reservation-preview { left: auto; right: 0; }
+.glass-calendar-schedule .glass-calendar-day-button:hover .calendar-reservation-preview, .glass-calendar-schedule .glass-calendar-day-button:focus-visible .calendar-reservation-preview { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+.glass-calendar-schedule .calendar-reservation-preview-item { padding: .35rem .5rem; border: 1px solid rgba(255,255,255,.12); font-size: .68rem; }
+.glass-calendar-schedule .calendar-reservation-preview-more { color: #b6c8bc; background: rgba(255,255,255,.08); }
+.glass-month-trigger { justify-content: flex-start; }
+.glass-month-popover { max-width: calc(100vw - 1rem); }
+.glass-month-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .15rem .25rem .65rem; text-align: center; }
+.glass-month-heading strong { font-size: .9rem; }
+.glass-month-heading button { display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; color: inherit; background: rgba(255,255,255,.05); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.glass-month-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .4rem; }
+.glass-month-grid button { min-height: 2.4rem; border: 1px solid transparent; border-radius: .7rem; color: inherit; background: rgba(255,255,255,.06); font: inherit; font-size: .75rem; text-transform: capitalize; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.glass-month-grid button:hover { background: rgba(255,255,255,.13); }
+.glass-month-grid button[aria-pressed="true"] { border-color: rgba(198,232,209,.45); color: #193629; background: #c6e8d1; font-weight: 700; }
+html:not(.dark) .glass-calendar-trigger { color: #26372e; background: rgba(255,255,255,.65); }
+html:not(.dark) .glass-calendar-trigger:hover, html:not(.dark) .glass-calendar-trigger[aria-expanded="true"] { background: rgba(255,255,255,.82); }
+html:not(.dark) .glass-calendar-popover { color: #26372e; border-color: rgba(64,99,77,.22); background: rgba(247,250,248,.9); box-shadow: 0 18px 48px rgba(25,45,33,.2), inset 0 1px 0 rgba(255,255,255,.7); }
+html:not(.dark) .glass-calendar-popover .glass-calendar-day-button[data-selected-single="true"], html:not(.dark) .glass-month-grid button[aria-pressed="true"] { color: #fff; background: #246247; }
+html:not(.dark) .glass-calendar-schedule .glass-calendar-day-button { color: #26372e; background: rgba(255,255,255,.56); }
+html:not(.dark) .glass-calendar-schedule .glass-calendar-day-button[data-selected-single="true"] { color: #173727; background: rgba(196,228,204,.82); }
+html:not(.dark) .glass-calendar-schedule .glass-calendar-outside .glass-calendar-day-button { color: #9ba89f; background: rgba(244,247,244,.42); }
+@keyframes glass-calendar-in { from { opacity: 0; transform: translateY(-5px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (hover: none) { .glass-calendar-schedule .glass-calendar-day-button[data-selected-single="true"] .calendar-reservation-preview { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; } }
+@media (max-width: 767px) {
+  .glass-calendar-schedule .glass-calendar-grid { border-spacing: .15rem .25rem; }
+  .glass-calendar-schedule .glass-calendar-day { height: 3.5rem; }
+  .glass-calendar-schedule .glass-calendar-day-button { min-height: 3.5rem; padding: .35rem; border-radius: .55rem; }
+  .glass-calendar-schedule .glass-calendar-weekday { padding-inline: .2rem; font-size: .56rem; }
+}
+@media (prefers-reduced-motion: reduce) { .glass-calendar-popover, .glass-calendar-day-button, .glass-calendar-nav-button, .glass-month-grid button { animation: none; transition: none; } }
