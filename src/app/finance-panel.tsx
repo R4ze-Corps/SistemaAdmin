@@ -4,6 +4,7 @@ import { useWorkspace } from "./workspace-context";
 
 import { FormEvent, useMemo, useState } from "react";
 import PayablesPanel, { type Payable } from "./payables-panel";
+import GlassTabs from "./glass-tabs";
 import { ArrowDownLeft, ArrowUpRight, Banknote, CalendarDays, Pencil, Plus, ReceiptText, Save, Trash2, WalletCards, X } from "lucide-react";
 
 export type FinanceKind = "entrada" | "saida";
@@ -49,7 +50,7 @@ export default function FinancePanel({ entries, onChange, payables, onPayablesCh
 
   return <section className="p-5 md:p-8">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><p className="text-[9px] font-bold tracking-[.14em] text-[#758078]">CONTROLE FINANCEIRO</p><h2 className="mt-1 text-2xl font-bold tracking-[-.055em] md:text-[28px]">{section === "transactions" ? "Entradas e saídas" : "Contas a pagar"}</h2><p className="mt-2 text-xs text-[#758078]">{section === "transactions" ? "Registre tudo que entrou ou saiu e acompanhe o saldo automaticamente." : "Acompanhe produtos, serviços, parcelas e datas de vencimento."}</p></div>{section === "transactions" && <button onClick={() => setDraft(emptyDraft())} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1f4b3a] px-4 text-xs font-bold text-white"><Plus size={16} /> Novo lançamento</button>}</div>
-    <div className="mt-6 inline-flex rounded-xl bg-[#eeeee8] p-1"><button onClick={() => setSection("transactions")} className={`rounded-lg px-4 py-2 text-[10px] font-bold ${section === "transactions" ? "bg-white text-[#1f4b3a] shadow-sm" : "text-[#68736c]"}`}>Movimentações</button><button onClick={() => setSection("payables")} className={`rounded-lg px-4 py-2 text-[10px] font-bold ${section === "payables" ? "bg-white text-[#1f4b3a] shadow-sm" : "text-[#68736c]"}`}>Contas a pagar</button></div>
+    <div className="mt-6"><GlassTabs tint={0.2} value={section} onValueChange={setSection} label="Seções financeiras" options={[{ value: "transactions", label: "Movimentações" }, { value: "payables", label: "Contas a pagar" }]} /></div>
 
     {section === "transactions" ? <><div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <FinanceMetric label="Saldo total" value={money(balance)} note="entradas menos saídas" icon={<WalletCards size={18} />} tone={balance < 0 ? "red" : "green"} />
