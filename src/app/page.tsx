@@ -11,13 +11,13 @@ import BetaDialog from "./beta-dialog";
 import { BetaFeedbackContext } from "./beta-feedback";
 import GlassTabs from "./glass-tabs";
 import { GlassButton } from "@/components/ui/glass-button";
-import { GlassSurface } from "@/components/ui/glass";
+import { Glass, GlassSurface } from "@/components/ui/glass";
 import { GlassSwitch as GlassCNGlassSwitch } from "@/components/ui/glass-switch";
 import { GlassCard, GlassCardContent, GlassCardDescription, GlassCardHeader, GlassCardTitle } from "@/components/ui/glass-card";
 import "./glass-tabs.css";
 import "./glass-switch.css";
 import { useWorkspace } from "./workspace-context";
-import { ArrowRight, Bell, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, Coffee, Dog, Download, FileText, LayoutDashboard, LogIn, Moon, LogOut, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, X } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Clock3, Coffee, Dog, Download, Ellipsis, FileText, LayoutDashboard, LogIn, Moon, LogOut, Paperclip, PartyPopper, Pencil, Plus, Save, Settings2, Star, Trash2, Sun, TreePalm, Upload, Users, WalletCards, X } from "lucide-react";
 
 type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
 type Attachment = { id: string; name: string; type: string; size: number; pathname?: string; url?: string; data?: string };
@@ -63,6 +63,9 @@ function Dashboard() {
   const [activeView, setActiveView] = useState<"overview" | "finance">("overview");
   const [darkMode, setDarkMode] = useState(false);
   const [headerSlots, setHeaderSlots] = useState<{ brand: HTMLElement | null; tabs: HTMLElement | null; actions: HTMLElement | null }>({ brand: null, tabs: null, actions: null });
+  const [notificationsMenuOpen, setNotificationsMenuOpen] = useState(false);
+  const [notificationsFavorite, setNotificationsFavorite] = useState(false);
+  const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     setHeaderSlots({
       brand: document.getElementById("matto-dashboard-brand"),
@@ -70,6 +73,23 @@ function Dashboard() {
       actions: document.getElementById("matto-dashboard-actions"),
     });
   }, []);
+  useEffect(() => {
+    if (!notificationsMenuOpen) return;
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (event.target instanceof Node && !notificationsMenuRef.current?.contains(event.target)) {
+        setNotificationsMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setNotificationsMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [notificationsMenuOpen]);
   const [view, setView] = useState(() => new Date());
   const [selectedDay, setSelectedDay] = useState(() => toISO(new Date()));
   const [selectedId, setSelectedId] = useState("");
@@ -205,7 +225,7 @@ function Dashboard() {
   return <BetaFeedbackContext.Provider value={{ message: beta ? notice : "", dismiss: () => setNotice("") }}><main className="min-h-screen bg-[#fffefa] text-[#22322b]"><section className="min-h-screen w-full overflow-hidden bg-[#fffefa]">
     {headerSlots.brand && createPortal(<div className="matto-dashboard-brand"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#1f4b3a] text-white"><TreePalm size={20} /></div><div><p className="text-[9px] font-bold tracking-[.14em] text-[#758078]">SISTEMA ADMINISTRATIVO</p><h1 className="text-[17px] font-bold tracking-[-.04em]">{activeView === "overview" ? "Visão Geral" : "Financeiro"}</h1></div></div>, headerSlots.brand)}
     {headerSlots.tabs && createPortal(<div className="matto-dashboard-tabs"><GlassTabs tint={0} value={activeView} onValueChange={next => setActiveView(next)} label="Seções administrativas" options={[{ value: "overview", label: "Visão geral", icon: <LayoutDashboard size={13} /> }, { value: "finance", label: "Financeiro", icon: <WalletCards size={13} /> }]} /></div>, headerSlots.tabs)}
-    {headerSlots.actions && createPortal(<div className="matto-dashboard-actions"><button onClick={toggleTheme} className="grid h-10 w-10 place-items-center rounded-xl border border-[#e4e3dc] bg-white text-[#46544b]" aria-label={darkMode ? "Ativar modo claro" : "Ativar modo escuro"} title={darkMode ? "Modo claro" : "Modo escuro"}>{darkMode ? <Sun size={16} /> : <Moon size={16} />}</button>{activeView === "overview" && <><button onClick={() => setCabinsOpen(true)} className="hidden h-10 items-center gap-2 rounded-xl border border-[#e4e3dc] bg-white px-3 text-[11px] font-bold text-[#46544b] sm:inline-flex"><Settings2 size={15} /> Chalés</button><button onClick={() => openNew()} className="inline-flex h-10 items-center rounded-xl bg-[#1f4b3a] px-3 text-[11px] font-bold text-white shadow-[0_5px_14px_rgba(23,71,53,.16)] md:px-4 md:text-[13px]"><Plus size={16} className="mr-1.5" /> Nova reserva</button><GlassButton variant="icon" tint={0.25} aria-label="Notifications" title="Notificações" onClick={() => setNotice("Você está em dia. Não há notificações novas.")}><Bell className="size-5" /></GlassButton></>}</div>, headerSlots.actions)}
+    {headerSlots.actions && createPortal(<div className="matto-dashboard-actions"><button onClick={toggleTheme} className="grid h-10 w-10 place-items-center rounded-xl border border-[#e4e3dc] bg-white text-[#46544b]" aria-label={darkMode ? "Ativar modo claro" : "Ativar modo escuro"} title={darkMode ? "Modo claro" : "Modo escuro"}>{darkMode ? <Sun size={16} /> : <Moon size={16} />}</button>{activeView === "overview" && <><button onClick={() => setCabinsOpen(true)} className="hidden h-10 items-center gap-2 rounded-xl border border-[#e4e3dc] bg-white px-3 text-[11px] font-bold text-[#46544b] sm:inline-flex"><Settings2 size={15} /> Chalés</button><button onClick={() => openNew()} className="inline-flex h-10 items-center rounded-xl bg-[#1f4b3a] px-3 text-[11px] font-bold text-white shadow-[0_5px_14px_rgba(23,71,53,.16)] md:px-4 md:text-[13px]"><Plus size={16} className="mr-1.5" /> Nova reserva</button><div ref={notificationsMenuRef} className="relative"><GlassButton variant="icon" tint={0.25} aria-label="Abrir menu de notificações" title="Mais opções" aria-haspopup="menu" aria-expanded={notificationsMenuOpen} aria-controls="notifications-glass-menu" onClick={() => setNotificationsMenuOpen((open) => !open)}><Ellipsis className="size-5" /></GlassButton>{notificationsMenuOpen && <div id="notifications-glass-menu" className="absolute right-0 top-[calc(100%+6px)] z-[90] w-56" role="menu" aria-label="Opções de notificações"><Glass strength={0.3} blur={7} tint={0.16} dome={0.14} radius={18} className="border border-white/20 text-[#22322b] shadow-[0_18px_42px_rgba(0,0,0,.26)] dark:border-white/10 dark:text-[#e9f1ec]" contentClassName="grid gap-1 p-2"><button type="button" role="menuitem" className="flex h-10 items-center gap-2 rounded-xl px-3 text-left text-xs font-medium transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10" onClick={() => { setNotificationsMenuOpen(false); setNotice("Você está em dia. Não há notificações novas."); }}><CircleHelp size={15} /> Mostrar informações</button><button type="button" role="menuitemcheckbox" aria-checked={notificationsFavorite} className="flex h-10 items-center gap-2 rounded-xl px-3 text-left text-xs font-medium transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10" onClick={() => { const next = !notificationsFavorite; setNotificationsFavorite(next); setNotificationsMenuOpen(false); setNotice(next ? "Menu adicionado aos favoritos." : "Menu removido dos favoritos."); }}><Star size={15} className={notificationsFavorite ? "fill-current" : ""} /> {notificationsFavorite ? "Remover dos favoritos" : "Favoritar"}</button></Glass></div>}</div></>}</div>, headerSlots.actions)}
     {beta && <div className="beta-save-status" role="status" aria-live="polite"><span>{saveStatus === "loading" ? "Carregando dados de teste…" : saveStatus === "saving" ? "Salvando alterações de teste…" : saveStatus === "saved" ? "Alterações de teste salvas" : "Alterações não confirmadas — confira sua conexão"}</span>{saveStatus === "error" && <button onClick={() => hydrated ? setRetry(value => value + 1) : window.location.reload()}>Tentar novamente</button>}</div>}
     {notice && (beta ? <div className="beta-notice" role="status" aria-live="polite"><span>{notice}</span><button aria-label="Dispensar mensagem" onClick={() => setNotice("")}><X size={18} /></button></div> : <div className="fixed right-5 top-5 z-50 rounded-xl bg-[#1f4b3a] px-4 py-3 text-xs font-bold text-white shadow-xl">{notice}</div>)}
     {activeView === "overview" ? <div className="grid lg:grid-cols-[minmax(0,1.65fr)_minmax(370px,.78fr)]"><section className="p-5 md:p-8"><div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-bold tracking-[.14em] text-[#758078]">AGENDA DE OCUPAÇÃO</p><h2 className="mt-1 text-2xl font-bold tracking-[-.055em] md:text-[28px]">{monthNames[view.getMonth()]} <span className="font-medium text-[#7d877f]">{view.getFullYear()}</span></h2></div><div className="flex gap-2"><button onClick={() => { setView(new Date()); setSelectedDay(toISO(new Date())); }} className="h-9 rounded-lg border border-[#e4e3dc] bg-white px-3 text-[11px] font-bold text-[#58645d]">Hoje</button><div className="flex overflow-hidden rounded-lg border border-[#e4e3dc]"><button onClick={() => setView((date) => new Date(date.getFullYear(), date.getMonth() - 1, 1))} className="grid h-9 w-9 place-items-center border-r border-[#e4e3dc] bg-white" aria-label="Mês anterior"><ChevronLeft size={18} /></button><button onClick={() => setView((date) => new Date(date.getFullYear(), date.getMonth() + 1, 1))} className="grid h-9 w-9 place-items-center bg-white" aria-label="Próximo mês"><ChevronRight size={18} /></button></div></div></div>
