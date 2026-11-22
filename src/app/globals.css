@@ -170,5 +170,5 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 .booking-edit-dialog { width: min(68rem, calc(100vw - 3rem)) !important; max-width: min(68rem, calc(100vw - 3rem)) !important; max-height: 94vh !important; padding: 2.25rem !important; }
 @media (max-width: 767px) { .booking-edit-dialog { width: calc(100vw - 1rem) !important; max-width: calc(100vw - 1rem) !important; max-height: 96dvh !important; padding: 1.25rem !important; } }
 
-.booking-details-dialog { max-height: 97vh !important; }
-@media (max-width: 767px) { .booking-details-dialog { max-height: 98dvh !important; } }
+.booking-details-dialog { max-height: 99vh !important; }
+@media (max-width: 767px) { .booking-details-dialog { max-height: 99dvh !important; } }
