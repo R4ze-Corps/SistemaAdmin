@@ -149,3 +149,5 @@ html:not(.dark) .glass-time-popup [class*="to-t"][class*="from-[#172b28]"] { bac
 html:not(.dark) .glass-time-popup [class*="border-white/10"] { border-color: rgba(75,104,86,.2) !important; }
 html:not(.dark) .glass-time-popup [class*="border-white/25"] { border-color: rgba(75,104,86,.28) !important; }
 html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: rgba(75,104,86,.08) !important; }
+.overview-calendar-layout { min-width: 0; }
+.selected-day-panel[aria-hidden="true"] { visibility: hidden; transition: opacity .5s ease-in-out, transform .5s ease-in-out, padding .5s ease-in-out, border-color .5s ease-in-out, visibility 0s linear .5s; }
