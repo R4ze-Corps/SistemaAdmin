@@ -214,6 +214,8 @@ export interface GlassProps {
   tint?: number;
   /** Tint colour as "r,g,b". Defaults to theme. */
   tintColor?: string;
+  /** Multiplier for the reflective sheen layer. */
+  sheenOpacity?: number;
   /** Lens dome bulge, 0 = flat. */
   dome?: number;
   /** Corner radius for the implicit single-lens mode, px. */
@@ -234,6 +236,7 @@ export function Glass({
   blur = 4,
   tint,
   tintColor,
+  sheenOpacity = 1,
   dome = 0,
   radius = 24,
   as: Tag = "div",
@@ -348,7 +351,7 @@ export function Glass({
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-[inherit]"
-            style={{ boxShadow: rimShadow(dark), background: sheen(dark) }}
+            style={{ boxShadow: rimShadow(dark), background: sheen(dark, sheenOpacity) }}
           />
         </>
       )}
@@ -369,10 +372,11 @@ function rimShadow(dark: boolean): string {
     : "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 0 0 1px rgba(255,255,255,0.4), 0 14px 38px -12px rgba(0,0,0,0.28)";
 }
 
-function sheen(dark: boolean): string {
+function sheen(dark: boolean, intensity = 1): string {
+  const alpha = (value: number) => value * Math.max(0, Math.min(1, intensity));
   return dark
-    ? "linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 36%, transparent 64%, rgba(255,255,255,0.06) 100%)"
-    : "linear-gradient(135deg, rgba(255,255,255,0.32) 0%, transparent 38%, transparent 62%, rgba(255,255,255,0.14) 100%)";
+    ? `linear-gradient(135deg, rgba(255,255,255,${alpha(0.14)}) 0%, transparent 36%, transparent 64%, rgba(255,255,255,${alpha(0.06)}) 100%)`
+    : `linear-gradient(135deg, rgba(255,255,255,${alpha(0.32)}) 0%, transparent 38%, transparent 62%, rgba(255,255,255,${alpha(0.14)}) 100%)`;
 }
 
 // ── GlassLens ─────────────────────────────────────────────────────────────────

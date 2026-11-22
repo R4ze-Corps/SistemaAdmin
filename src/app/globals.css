@@ -243,10 +243,10 @@ html.dark .launcher-screen { background: radial-gradient(ellipse at 13% 8%, rgba
 .launcher-screen > div { animation: launcher-home-in .55s cubic-bezier(.2,.7,.2,1) both; }
 .launcher-glass-card { height: 100%; transition: border-color .25s ease, box-shadow .25s ease; }
 .launcher-glass-card:hover { border-color: rgba(117,183,147,.4); box-shadow: 0 24px 70px rgba(9,25,17,.13); }
-.launcher-card-orb { position: absolute; top: 5.5rem; right: -5.5rem; width: 15rem; aspect-ratio: 1; border-radius: 9999px; opacity: .28; filter: blur(50px); pointer-events: none; transition: transform .45s ease, opacity .35s ease; }
+.launcher-card-orb { position: absolute; top: 5.5rem; right: -5.5rem; width: 15rem; aspect-ratio: 1; border-radius: 9999px; opacity: .18; filter: blur(50px); pointer-events: none; transition: transform .45s ease, opacity .35s ease; }
 .launcher-card-orb-reservas { background: radial-gradient(circle, rgba(103,177,131,.68), rgba(103,177,131,0) 70%); }
 .launcher-card-orb-adega { background: radial-gradient(circle, rgba(197,159,93,.68), rgba(197,159,93,0) 70%); }
 .launcher-card-orb-agendamentos { background: radial-gradient(circle, rgba(107,157,169,.62), rgba(107,157,169,0) 70%); }
-.launcher-glass-card:hover .launcher-card-orb { transform: scale(1.16) translate(-4%, 3%); opacity: .5; }
+.launcher-glass-card:hover .launcher-card-orb { transform: scale(1.16) translate(-4%, 3%); opacity: .35; }
 @keyframes launcher-home-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .launcher-screen > div { animation: none; } .launcher-glass-card, .launcher-card-orb { transition: none; } }
