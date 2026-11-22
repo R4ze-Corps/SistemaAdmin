@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { BetaFeedbackContext } from "./beta-feedback";
 
 /** Native modal semantics, keyboard containment and focus restoration, Beta only. */
-export default function BetaDialog({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+export default function BetaDialog({ children, onClose, className = "" }: { children: ReactNode; onClose: () => void; className?: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const changed = useRef(false);
   const titleId = useId();
@@ -29,7 +29,7 @@ export default function BetaDialog({ children, onClose }: { children: ReactNode;
     if (changed.current && !window.confirm("Descartar as alterações deste formulário? Para mantê-las, cancele e salve antes de fechar.")) return;
     onClose();
   }
-  return <dialog ref={dialog} className="beta-dialog" aria-labelledby={titleId} onCancel={event => { event.preventDefault(); dismiss(); }} onChangeCapture={() => { changed.current = true; }} onClickCapture={event => { if ((event.target as HTMLElement).closest('[role="switch"], [aria-pressed]')) changed.current = true; }}>
+  return <dialog ref={dialog} className={`beta-dialog ${className}`} aria-labelledby={titleId} onCancel={event => { event.preventDefault(); dismiss(); }} onChangeCapture={() => { changed.current = true; }} onClickCapture={event => { if ((event.target as HTMLElement).closest('[role="switch"], [aria-pressed]')) changed.current = true; }}>
     <button type="button" onClick={dismiss} aria-label="Fechar janela" className="beta-dialog-close"><X size={20} /></button>
     {feedback.message && <div className="beta-dialog-feedback" role="status" aria-live="polite"><span>{feedback.message}</span><button type="button" aria-label="Dispensar mensagem" onClick={feedback.dismiss}><X size={18} /></button></div>}
     {children}

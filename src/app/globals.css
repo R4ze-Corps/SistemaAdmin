@@ -165,3 +165,7 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 .auth-01-page input.auth-01-field:focus { border-color: rgba(127,185,255,.78) !important; box-shadow: 0 0 0 3px rgba(74,159,255,.16) !important; }
 .auth-01-page .auth-password-toggle { border: 1px solid rgba(220,235,255,.3) !important; background: rgba(220,235,255,.14) !important; color: rgba(255,255,255,.92) !important; -webkit-backdrop-filter: blur(12px) saturate(150%); backdrop-filter: blur(12px) saturate(150%); box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 8px rgba(3,10,22,.18); }
 .auth-01-page .auth-password-toggle:hover { border-color: rgba(220,235,255,.5) !important; background: rgba(220,235,255,.22) !important; }
+
+/* Expanded reservation editor dialog */
+.booking-edit-dialog { width: min(68rem, calc(100vw - 3rem)) !important; max-width: min(68rem, calc(100vw - 3rem)) !important; max-height: 94vh !important; padding: 2.25rem !important; }
+@media (max-width: 767px) { .booking-edit-dialog { width: calc(100vw - 1rem) !important; max-width: calc(100vw - 1rem) !important; max-height: 96dvh !important; padding: 1.25rem !important; } }

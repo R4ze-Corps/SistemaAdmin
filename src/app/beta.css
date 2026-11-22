@@ -44,6 +44,7 @@ html.dark .beta-design {
   background: var(--beta-surface); color: var(--beta-content); box-shadow: 0 24px 60px rgb(0 0 0 / .25);
 }
 .beta-design .beta-dialog::backdrop { background: rgb(12 19 16 / .65); }
+.beta-design .beta-dialog.booking-edit-dialog { width: min(68rem, calc(100vw - 3rem)); max-width: min(68rem, calc(100vw - 3rem)); max-height: min(94dvh, 70rem); padding: 2.25rem; }
 .beta-design .beta-dialog h2 { padding-right: 3rem; }
 .beta-design .beta-dialog-close { position: absolute; top: 1rem; right: 1rem; display: grid; place-items: center; border: 1px solid var(--beta-border); border-radius: .75rem; }
 .beta-design .beta-dialog [class*="grid-cols-"] { min-width: 0; }
@@ -56,6 +57,7 @@ html.dark .beta-design {
 .beta-design .beta-dialog b.truncate { overflow-wrap: anywhere; white-space: normal; }
 @media (max-width: 767px) {
   .beta-design .beta-dialog { width: calc(100vw - 1rem); max-height: 95dvh; padding: 1.25rem; }
+  .beta-design .beta-dialog.booking-edit-dialog { width: calc(100vw - 1rem); max-width: calc(100vw - 1rem); max-height: 96dvh; padding: 1.25rem; }
   .beta-design .beta-dialog .grid-cols-2 { grid-template-columns: minmax(0, 1fr); }
   .beta-design .beta-calendar-compact { display: grid; gap: .125rem; margin-top: .5rem; font-size: .75rem; font-weight: 600; }
   .beta-design [data-beta-day] { padding: .375rem; min-height: 5.5rem; }
