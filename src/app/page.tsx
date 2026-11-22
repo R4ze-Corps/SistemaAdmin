@@ -335,10 +335,10 @@ function GlassCalendarPicker({ label, value, onChange, dark }: { label: string; 
   };
 
   return <>
-    <button ref={trigger} type="button" aria-label={`${label}: ${displayValue}`} aria-haspopup="dialog" aria-expanded={open} onClick={open ? () => setOpen(false) : openPicker} className={`flex h-10 w-full items-center justify-between rounded-lg border border-[#dcded8] bg-white px-3 text-left text-xs outline-none transition hover:bg-[#f5f7f4] text-white focus-visible:ring-2 focus-visible:ring-[#75a385]/40`}>
+    <button ref={trigger} type="button" aria-label={`${label}: ${displayValue}`} aria-haspopup="dialog" aria-expanded={open} onClick={open ? () => setOpen(false) : openPicker} className={`glass-calendar-trigger flex h-10 w-full items-center justify-between rounded-lg border border-[#dcded8] bg-white px-3 text-left text-xs outline-none transition hover:bg-[#f5f7f4] text-white focus-visible:ring-2 focus-visible:ring-[#75a385]/40`}>
       <span className={selected ? `font-semibold tabular-nums text-white` : dark ? "text-[#b5c5bc]" : "text-[#758078]"}>{displayValue}</span><CalendarDays size={15} className={`shrink-0 text-white/75`} aria-hidden="true" />
     </button>
-    {open && portal ? createPortal(<div ref={panel} role="dialog" aria-label={`Calendário: ${monthLabel}`} className="fixed z-[100] overflow-hidden rounded-2xl border border-[#385348] bg-[rgba(16,31,24,.9)] p-2.5 text-[#e5eee8] shadow-[0_18px_50px_rgba(0,0,0,.38)] backdrop-blur-xl" style={{ left: position.left, top: position.top, width: position.width }}>
+    {open && portal ? createPortal(<div ref={panel} role="dialog" aria-label={`Calendário: ${monthLabel}`} className="glass-calendar-panel fixed z-[100] overflow-hidden rounded-2xl border border-[#385348] bg-[rgba(16,31,24,.9)] p-2.5 text-[#e5eee8] shadow-[0_18px_50px_rgba(0,0,0,.38)] backdrop-blur-xl" style={{ left: position.left, top: position.top, width: position.width }}>
       <div className="mb-2 flex items-center justify-between gap-2 px-1">
         <p className="min-w-0 flex-1 truncate text-sm font-semibold capitalize">{monthLabel}</p>
         <div className="flex gap-1">
@@ -416,10 +416,10 @@ function GlassTimePicker({ label, value, onChange }: { label: string; value: str
     </div>
   </div>;
   return <>
-    <button ref={trigger} type="button" aria-label={`${label}: ${value}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) setOpen(false); else { place(); setOpen(true); } }} className="flex h-10 w-full items-center justify-between rounded-lg border border-white/15 bg-white/[.04] px-3 text-left text-xs font-semibold text-white outline-none transition hover:bg-white/[.08] focus-visible:ring-2 focus-visible:ring-[#75a385]/40">
+    <button ref={trigger} type="button" aria-label={`${label}: ${value}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) setOpen(false); else { place(); setOpen(true); } }} className="glass-time-trigger flex h-10 w-full items-center justify-between rounded-lg border border-white/15 bg-white/[.04] px-3 text-left text-xs font-semibold text-white outline-none transition hover:bg-white/[.08] focus-visible:ring-2 focus-visible:ring-[#75a385]/40">
       <span className="tabular-nums">{value}</span><Clock3 size={15} className="shrink-0 text-white/70" aria-hidden="true" />
     </button>
-    {open && portal ? createPortal(<GlassSurface ref={panel} role="dialog" aria-label={`Selecionar ${label.toLocaleLowerCase()}`} className="fixed z-[110] overflow-hidden border border-white/20 text-white shadow-[0_18px_50px_rgba(0,0,0,.42)]" contentClassName="p-2" style={{ position: "fixed", zIndex: 110, left: position.left, top: position.top, width: 204, maxHeight: 204 }} tint={0.22} tintColor="28,49,48" blur={18} saturation={1.65} radius={16} specular>
+    {open && portal ? createPortal(<GlassSurface ref={panel} role="dialog" aria-label={`Selecionar ${label.toLocaleLowerCase()}`} className="glass-time-popup fixed z-[110] overflow-hidden border border-white/20 text-white shadow-[0_18px_50px_rgba(0,0,0,.42)]" contentClassName="p-2" style={{ position: "fixed", zIndex: 110, left: position.left, top: position.top, width: 204, maxHeight: 204 }} tint={0.22} blur={18} saturation={1.65} radius={16} specular>
       <div className="flex gap-2">{renderWheel("Hora", hours, hour, hourList, (next) => setTimePart(next, minute))}<div className="mt-5 flex h-40 items-center text-lg text-white/35">:</div>{renderWheel("Minuto", minutes, minute, minuteList, (next) => setTimePart(hour, next))}</div>
     </GlassSurface>, portal) : null}
   </>;
@@ -496,10 +496,10 @@ function GlassTimePicker({ label, value, onChange }: { label: string; value: str
     requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-option-index="${next}"]`)?.focus());
   };
   return <>
-    <button ref={trigger} type="button" role="combobox" aria-label={ariaLabel} aria-haspopup="listbox" aria-expanded={open} onClick={open ? () => setOpen(false) : openMenu} onKeyDown={(event) => { if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); openMenu(); } }} className="flex h-10 w-full items-center justify-between rounded-xl border border-white/20 bg-[rgba(32,58,65,.38)] px-3 text-left text-xs text-[#f4fafb] shadow-[inset_0_1px_0_rgba(255,255,255,.12)] outline-none backdrop-blur-xl backdrop-saturate-150 transition hover:bg-[rgba(45,77,84,.5)] focus-visible:ring-2 focus-visible:ring-cyan-200/40">
+    <button ref={trigger} type="button" role="combobox" aria-label={ariaLabel} aria-haspopup="listbox" aria-expanded={open} onClick={open ? () => setOpen(false) : openMenu} onKeyDown={(event) => { if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); openMenu(); } }} className="glass-select-trigger flex h-10 w-full items-center justify-between rounded-xl border border-white/20 bg-[rgba(32,58,65,.38)] px-3 text-left text-xs text-[#f4fafb] shadow-[inset_0_1px_0_rgba(255,255,255,.12)] outline-none backdrop-blur-xl backdrop-saturate-150 transition hover:bg-[rgba(45,77,84,.5)] focus-visible:ring-2 focus-visible:ring-cyan-200/40">
       <span className="truncate">{selected?.label ?? "Selecione um chalé"}</span><ChevronDown size={15} className="ml-2 shrink-0 text-white/70" aria-hidden="true" />
     </button>
-    {open && portal ? createPortal(<GlassSurface ref={panel} id="cabin-glass-select-listbox" role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className="fixed z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]" contentClassName="max-h-[min(15rem,calc(100vh-16px))] overflow-y-auto p-1.5" style={{ position: "fixed", zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: "min(15rem, calc(100vh - 16px))" }} tint={0.24} tintColor="32,58,65" blur={18} saturation={1.65} radius={12} specular>
+    {open && portal ? createPortal(<GlassSurface ref={panel} id="cabin-glass-select-listbox" role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className="glass-select-popup fixed z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]" contentClassName="max-h-[min(15rem,calc(100vh-16px))] overflow-y-auto p-1.5" style={{ position: "fixed", zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: "min(15rem, calc(100vh - 16px))" }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
       {options.map((option, index) => {
         const isSelected = option.value === value;
         const isActive = index === activeIndex;
