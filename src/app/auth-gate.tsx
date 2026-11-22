@@ -20,7 +20,6 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   const [managing, setManaging] = useState(false);
   const [firstAdmin, setFirstAdmin] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsInitialTab, setSettingsInitialTab] = useState<"profile" | "store">("profile");
   useEffect(() => {
     if (!user) return;
     applyTheme(effectiveTheme(user));
@@ -43,8 +42,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     catch (error) { setError(error instanceof Error ? error.message : "Não foi possível sair."); }
   }
   useEffect(() => {
-    const openSettings = () => { setSettingsInitialTab("profile"); setSettingsOpen(true); setManaging(false); };
-    const openStoreInventory = () => { if (!user || user.role !== "admin") return; setSettingsInitialTab("store"); setSettingsOpen(true); setManaging(false); };
+    const openSettings = () => { setSettingsOpen(true); setManaging(false); };
     const openAccounts = () => {
       if (!user || user.role !== "admin" || user.preferences.betaEnabled) return;
       setManaging(true);
@@ -52,12 +50,10 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     };
     const requestLogout = () => { void logout(); };
     window.addEventListener("open-settings-panel", openSettings);
-    window.addEventListener("open-store-inventory", openStoreInventory);
     window.addEventListener("open-accounts-panel", openAccounts);
     window.addEventListener("request-auth-logout", requestLogout);
     return () => {
       window.removeEventListener("open-settings-panel", openSettings);
-      window.removeEventListener("open-store-inventory", openStoreInventory);
       window.removeEventListener("open-accounts-panel", openAccounts);
       window.removeEventListener("request-auth-logout", requestLogout);
     };
@@ -68,8 +64,8 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     <div id="matto-dashboard-brand" className="matto-dashboard-brand-slot"><Glass strength={0.28} blur={7} tint={0.14} dome={0.1} radius={999} className="matto-user-pill" contentClassName="relative z-10 flex items-center gap-2.5 px-3 py-1.5 text-sm font-semibold text-[#26372e] dark:text-white"><span className="matto-user-avatar grid size-8 shrink-0 place-items-center overflow-hidden rounded-full border border-[#1f4b3a]/20 bg-[#1f4b3a]/10 text-[#1f4b3a] shadow-inner dark:border-white/20 dark:bg-white/10 dark:text-white">{user.avatarUrl ? <Image src={user.avatarUrl} alt="" width={32} height={32} unoptimized className="size-full object-cover" /> : <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" strokeLinecap="round" /></svg>}</span><span className="max-w-44 truncate">{user.name}</span></Glass></div>
     <div id="matto-dashboard-tabs" className="matto-dashboard-tabs-slot" />
 
-    <div id="matto-dashboard-actions" className="matto-dashboard-actions-slot" data-can-manage-accounts={user.role === "admin" && !user.preferences.betaEnabled ? "true" : "false"} data-can-manage-store={user.role === "admin" ? "true" : "false"} />
-  </header>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && !user.preferences.betaEnabled && <Accounts onClose={() => setManaging(false)} />}{settingsOpen && <SettingsPanel user={user} onUser={setUser} onBack={() => setSettingsOpen(false)} accounts={<Accounts onClose={() => setSettingsOpen(false)} />} initialTab={settingsInitialTab} onCabins={() => { setSettingsOpen(false); window.dispatchEvent(new Event("open-cabin-settings")); }} />}{user.role === "admin" && !user.preferences.betaEnabled && <BackupNotifier />}{user.preferences.betaEnabled && <div role="status" className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5d1af] bg-[#f3e9da] px-5 py-3 text-sm text-[#906a36]"><span><b>MODO BETA</b> · Ambiente de testes pessoal. Dados e anexos reais protegidos.</span><button onClick={() => setSettingsOpen(true)} className="min-h-11 rounded-lg border border-current px-3 font-semibold">Gerenciar Modo Beta</button></div>}<WorkspaceContext.Provider value={{ mode: user.preferences.betaEnabled ? "beta" : "production", documentPrefix: user.preferences.betaEnabled ? `beta/${user.id}/reservas/` : "reservas/" }}><div key={user.preferences.betaEnabled ? "beta" : "production"} hidden={settingsOpen}>{children}</div></WorkspaceContext.Provider></div>;
+    <div id="matto-dashboard-actions" className="matto-dashboard-actions-slot" data-can-manage-accounts={user.role === "admin" && !user.preferences.betaEnabled ? "true" : "false"} />
+  </header>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && !user.preferences.betaEnabled && <Accounts onClose={() => setManaging(false)} />}{settingsOpen && <SettingsPanel user={user} onUser={setUser} onBack={() => setSettingsOpen(false)} accounts={<Accounts onClose={() => setSettingsOpen(false)} />} onCabins={() => { setSettingsOpen(false); window.dispatchEvent(new Event("open-cabin-settings")); }} />}{user.role === "admin" && !user.preferences.betaEnabled && <BackupNotifier />}{user.preferences.betaEnabled && <div role="status" className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5d1af] bg-[#f3e9da] px-5 py-3 text-sm text-[#906a36]"><span><b>MODO BETA</b> · Ambiente de testes pessoal. Dados e anexos reais protegidos.</span><button onClick={() => setSettingsOpen(true)} className="min-h-11 rounded-lg border border-current px-3 font-semibold">Gerenciar Modo Beta</button></div>}<WorkspaceContext.Provider value={{ mode: user.preferences.betaEnabled ? "beta" : "production", documentPrefix: user.preferences.betaEnabled ? `beta/${user.id}/reservas/` : "reservas/" }}><div key={user.preferences.betaEnabled ? "beta" : "production"} hidden={settingsOpen}>{children}</div></WorkspaceContext.Provider></div>;
 }
 function AccessForm({ initialError, firstAdmin, onLogin }: { initialError: string; firstAdmin: boolean; onLogin: (user: User) => void }) {
   const [register, setRegister] = useState(firstAdmin);

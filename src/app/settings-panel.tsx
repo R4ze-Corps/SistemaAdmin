@@ -20,8 +20,8 @@ export function applyTheme(theme: SettingsUser["preferences"]["theme"]) {
 const input = "mt-2 min-h-12 w-full rounded-xl border border-[#b7ccbc] bg-white px-3 text-base text-[#22322b] outline-[#75a385] disabled:opacity-60";
 const saveButton = "inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#1f4b3a] px-5 text-sm font-semibold text-white disabled:opacity-50";
 type Tab = "profile" | "security" | "appearance" | "administration" | "store" | "backup" | "about" | "beta";
-export default function SettingsPanel({ user, onUser, onBack, accounts, onCabins, initialTab = "profile" }: { user: SettingsUser; onUser: (user: SettingsUser) => void; onBack: () => void; accounts: ReactNode; onCabins: () => void; initialTab?: "profile" | "store" }) {
-  const [tab, setTab] = useState<Tab>(user.preferences.betaEnabled ? "beta" : initialTab);
+export default function SettingsPanel({ user, onUser, onBack, accounts, onCabins }: { user: SettingsUser; onUser: (user: SettingsUser) => void; onBack: () => void; accounts: ReactNode; onCabins: () => void }) {
+  const [tab, setTab] = useState<Tab>(user.preferences.betaEnabled ? "beta" : "profile");
   const [busy, setBusy] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [message, setMessage] = useState("");
