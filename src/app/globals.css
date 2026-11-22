@@ -142,3 +142,9 @@ html:not(.dark) .glass-select-popup { color: #26372e !important; border-color: r
 html:not(.dark) .glass-select-popup [role="option"] { color: #35483c !important; }
 html:not(.dark) .glass-select-popup [role="option"][aria-selected="true"] { color: #1f4b3a !important; background: rgba(31,75,58,.12) !important; }
 html:not(.dark) .glass-select-popup [role="option"]:hover { background: rgba(31,75,58,.08) !important; }
+html:not(.dark) .glass-time-popup [class*="bg-black/10"] { background-color: rgba(255,255,255,.32) !important; }
+html:not(.dark) .glass-time-popup [class*="from-[#172b28]"] { background-image: linear-gradient(to bottom, rgba(248,251,249,.9), transparent) !important; }
+html:not(.dark) .glass-time-popup [class*="to-t"][class*="from-[#172b28]"] { background-image: linear-gradient(to top, rgba(248,251,249,.9), transparent) !important; }
+html:not(.dark) .glass-time-popup [class*="border-white/10"] { border-color: rgba(75,104,86,.2) !important; }
+html:not(.dark) .glass-time-popup [class*="border-white/25"] { border-color: rgba(75,104,86,.28) !important; }
+html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: rgba(75,104,86,.08) !important; }
