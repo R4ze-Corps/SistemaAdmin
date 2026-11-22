@@ -172,3 +172,7 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 
 .booking-details-dialog { max-height: 99vh !important; }
 @media (max-width: 767px) { .booking-details-dialog { max-height: 99dvh !important; } }
+
+.finance-kind-navbar .glass-tabs { display: flex; width: 100%; }
+.finance-kind-navbar .glass-tabs-list { display: flex; width: 100%; }
+.finance-kind-navbar .glass-tabs-trigger { flex: 1 1 0%; }
