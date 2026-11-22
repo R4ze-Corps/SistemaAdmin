@@ -154,9 +154,12 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 .selected-day-panel[aria-hidden="true"] { visibility: hidden; transition: opacity .5s ease-in-out, transform .5s ease-in-out, padding .5s ease-in-out, border-color .5s ease-in-out, visibility 0s linear .5s; }
 @media (min-width: 768px) { .auth-01-page { min-height: 125vh !important; } }
 .auth-01-page { background: radial-gradient(ellipse at 18% 86%, rgba(30,88,168,.5), transparent 43%), radial-gradient(ellipse at 88% 42%, rgba(7,115,139,.28), transparent 42%), linear-gradient(155deg, #070d18 0%, #101c32 52%, #142a50 100%); }
-.auth-01-aurora { position: absolute; z-index: 0; width: min(34rem, 78vw); aspect-ratio: 1; border-radius: 999px; opacity: .5; filter: blur(82px); pointer-events: none; }
-.auth-01-aurora-one { top: -18%; left: -12%; background: radial-gradient(circle, rgba(40,120,224,.55), rgba(28,76,149,.16) 58%, transparent 72%); }
-.auth-01-aurora-two { right: -16%; bottom: -28%; background: radial-gradient(circle, rgba(35,116,204,.46), rgba(20,66,139,.12) 56%, transparent 72%); }
+.auth-01-aurora { position: absolute; z-index: 0; width: min(34rem, 78vw); aspect-ratio: 1; border-radius: 999px; opacity: .5; filter: blur(82px); pointer-events: none; will-change: transform; }
+.auth-01-aurora-one { top: -18%; left: -12%; background: radial-gradient(circle, rgba(40,120,224,.55), rgba(28,76,149,.16) 58%, transparent 72%); animation: auth-01-drift-one 24s ease-in-out infinite alternate; }
+.auth-01-aurora-two { right: -16%; bottom: -28%; background: radial-gradient(circle, rgba(35,116,204,.46), rgba(20,66,139,.12) 56%, transparent 72%); animation: auth-01-drift-two 30s ease-in-out infinite alternate; }
+@keyframes auth-01-drift-one { from { transform: translate3d(-2%, -1%, 0) scale(.94); } to { transform: translate3d(18%, 13%, 0) scale(1.12); } }
+@keyframes auth-01-drift-two { from { transform: translate3d(4%, 0, 0) scale(1.08); } to { transform: translate3d(-17%, -13%, 0) scale(.9); } }
+@media (prefers-reduced-motion: reduce) { .auth-01-aurora-one, .auth-01-aurora-two { animation: none; } }
 .auth-01-page input.auth-01-field { color: #f7f9ff !important; border-color: rgba(193,211,239,.22) !important; background: rgba(180,198,224,.16) !important; }
 .auth-01-page input.auth-01-field::placeholder { color: rgba(228,236,250,.5) !important; }
 .auth-01-page input.auth-01-field:focus { border-color: rgba(127,185,255,.78) !important; box-shadow: 0 0 0 3px rgba(74,159,255,.16) !important; }
