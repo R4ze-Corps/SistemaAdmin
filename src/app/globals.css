@@ -157,6 +157,6 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 .auth-01-aurora { position: absolute; z-index: 0; width: min(34rem, 78vw); aspect-ratio: 1; border-radius: 999px; opacity: .5; filter: blur(82px); pointer-events: none; }
 .auth-01-aurora-one { top: -18%; left: -12%; background: radial-gradient(circle, rgba(40,120,224,.55), rgba(28,76,149,.16) 58%, transparent 72%); }
 .auth-01-aurora-two { right: -16%; bottom: -28%; background: radial-gradient(circle, rgba(35,116,204,.46), rgba(20,66,139,.12) 56%, transparent 72%); }
-.auth-01-field { color: #f7f9ff !important; border-color: rgba(255,255,255,.16) !important; background: rgba(180,198,224,.16) !important; }
-.auth-01-field::placeholder { color: rgba(228,236,250,.5) !important; }
-.auth-01-field:focus { border-color: rgba(127,185,255,.72) !important; }
+.auth-01-page input.auth-01-field { color: #f7f9ff !important; border-color: rgba(193,211,239,.22) !important; background: rgba(180,198,224,.16) !important; }
+.auth-01-page input.auth-01-field::placeholder { color: rgba(228,236,250,.5) !important; }
+.auth-01-page input.auth-01-field:focus { border-color: rgba(127,185,255,.78) !important; box-shadow: 0 0 0 3px rgba(74,159,255,.16) !important; }
