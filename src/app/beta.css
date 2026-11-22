@@ -30,7 +30,6 @@ html.dark .beta-design {
 .beta-design [data-beta-day][aria-pressed="true"] { outline: 2px solid var(--beta-accent); outline-offset: 1px; box-shadow: none; }
 .beta-design [data-beta-day].opacity-30 { opacity: 1; color: var(--beta-secondary); background: color-mix(in srgb, var(--beta-surface), var(--beta-secondary) 8%); }
 .beta-design [data-beta-day] { min-width: 0; }
-.beta-design [data-beta-day] > .absolute { display: none; }
 .beta-design .beta-calendar-compact { display: none; }
 .beta-design .beta-save-status, .beta-design .beta-notice, .beta-design .beta-settings-note {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
@@ -79,6 +78,3 @@ html.dark .beta-design {
   html.dark .beta-design { --beta-secondary: #e9f1ec; --beta-border: #e9f1ec; }
   .beta-design button, .beta-design a { text-decoration-thickness: 2px; }
 }
-.beta-design [data-beta-day] { overflow: hidden; }
-.beta-design [data-beta-day] > span.mt-1\.5 { margin-top: .125rem !important; gap: 0 !important; min-width: 0; }
-.beta-design [data-beta-day] small.truncate { display: block; box-sizing: border-box; min-width: 0; max-width: 100%; overflow: hidden; overflow-wrap: normal; white-space: nowrap; text-overflow: ellipsis; font-size: .5rem !important; line-height: 1 !important; padding-block: 0 !important; }

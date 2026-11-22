@@ -151,3 +151,27 @@ html:not(.dark) .glass-time-popup [class*="border-white/25"] { border-color: rgb
 html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: rgba(75,104,86,.08) !important; }
 .overview-calendar-layout { min-width: 0; }
 .selected-day-panel[aria-hidden="true"] { visibility: hidden; transition: opacity .5s ease-in-out, transform .5s ease-in-out, padding .5s ease-in-out, border-color .5s ease-in-out, visibility 0s linear .5s; }
+.calendar-day-cell:is(:hover, :focus-visible) { z-index: 40; }
+.calendar-reservation-preview {
+  position: absolute; top: calc(100% + .25rem); left: 0; z-index: 50; display: grid; gap: .3rem;
+  width: max-content; min-width: max(100%, 10.5rem); max-width: min(15rem, calc(100vw - 1.5rem));
+  padding: .45rem; border: 1px solid rgba(255,255,255,.16); border-radius: .75rem;
+  color: #e9f1ec; background: rgba(18,33,26,.96); backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3); box-shadow: 0 12px 28px rgba(0,0,0,.28);
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-.25rem);
+  transition: opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
+}
+.calendar-day-cell:is(:hover, :focus-visible) > .calendar-reservation-preview {
+  opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s;
+}
+.calendar-day-cell:is([data-calendar-column="5"], [data-calendar-column="6"]) > .calendar-reservation-preview { left: auto; right: 0; }
+.calendar-reservation-preview-item {
+  display: block; min-width: 0; overflow: hidden; padding: .35rem .5rem; border-radius: .45rem;
+  font-size: .7rem; font-weight: 600; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap;
+}
+.calendar-reservation-preview-more { color: #b6c8bc; background: rgba(255,255,255,.08); }
+html:not(.dark) .calendar-reservation-preview { color: #22322b; background: rgba(250,252,250,.97); border-color: rgba(64,99,77,.25); }
+html:not(.dark) .calendar-reservation-preview-more { color: #536158; background: rgba(31,75,58,.08); }
+@media (hover: none) {
+  .calendar-day-cell[aria-pressed="true"] > .calendar-reservation-preview { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+}
