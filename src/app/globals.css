@@ -176,3 +176,63 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 .finance-kind-navbar .glass-tabs { display: flex; width: 100%; }
 .finance-kind-navbar .glass-tabs-list { display: flex; width: 100%; }
 .finance-kind-navbar .glass-tabs-trigger { flex: 1 1 0%; }
+
+/* glasscn typography: system font, modular type scale and consistent hierarchy. */
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: var(--font-sans);
+  --font-display: var(--font-heading);
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --glass-font-sans: var(--font-sans);
+  --glass-font-heading: var(--font-heading);
+  --glass-font-display: var(--font-display);
+  --glass-font-mono: var(--font-mono);
+  --glass-text-scale: 1;
+  --glass-type-ratio: 1.25;
+  --glass-leading: 1.6;
+  --glass-tracking: 0em;
+  --glass-body-weight: 400;
+  --glass-heading-weight: 650;
+  --glass-heading-tracking: -0.015em;
+  --glass-heading-leading: 1.15;
+  --glass-heading-wrap: balance;
+  --glass-display-weight: 700;
+  --glass-display-tracking: -0.03em;
+  --glass-numeric: tabular-nums;
+}
+.type-glass {
+  font-family: var(--glass-font-sans);
+  font-size: calc(1rem * var(--glass-text-scale));
+  font-weight: var(--glass-body-weight);
+  letter-spacing: var(--glass-tracking);
+  line-height: var(--glass-leading);
+  font-feature-settings: var(--glass-font-features, normal);
+}
+.type-glass :is(h1, h2, h3, h4, h5, h6, [data-slot="heading"]) {
+  font-family: var(--glass-font-heading);
+  font-weight: var(--glass-heading-weight);
+  letter-spacing: var(--glass-heading-tracking);
+  line-height: var(--glass-heading-leading);
+  text-wrap: var(--glass-heading-wrap);
+}
+.type-glass :is(p, li, blockquote) { text-wrap: pretty; }
+.type-glass :is(input, button, select, textarea) { font-family: var(--glass-font-sans); }
+.type-glass .type-glass-heading { font-family: var(--glass-font-heading); }
+.type-glass .type-glass-display { font-family: var(--glass-font-display); font-weight: var(--glass-display-weight); letter-spacing: var(--glass-display-tracking); font-variant-numeric: var(--glass-numeric); }
+.type-glass .font-glass-mono { font-family: var(--glass-font-mono); }
+.type-glass .numeric-glass { font-variant-numeric: var(--glass-numeric); }
+.type-glass .type-step-n2 { font-size: calc(1rem * var(--glass-text-scale) * .64); }
+.type-glass .type-step-n1 { font-size: calc(1rem * var(--glass-text-scale) * .8); }
+.type-glass .type-step-0 { font-size: calc(1rem * var(--glass-text-scale)); }
+.type-glass .type-step-1 { font-size: calc(1rem * var(--glass-text-scale) * 1.25); }
+.type-glass .type-step-2 { font-size: calc(1rem * var(--glass-text-scale) * 1.5625); }
+.type-glass .type-step-3 { font-size: calc(1rem * var(--glass-text-scale) * 1.953125); }
+.type-glass .type-step-4 { font-size: calc(1rem * var(--glass-text-scale) * 2.44140625); }
+.type-glass .type-step-5 { font-size: calc(1rem * var(--glass-text-scale) * 3.0517578125); }
+.type-glass .type-step-6 { font-size: calc(1rem * var(--glass-text-scale) * 3.814697265625); }
+.type-glass .store-page { font-family: var(--glass-font-sans) !important; }
+.type-glass .store-page :is(.store-hero h1, .store-menu-heading h2, .store-count, .store-card-index, .store-card-body>strong, .store-card-bottom>b, .store-detail-copy h2, .store-detail-copy>strong, .store-feature-caption strong, .store-feature-seal) { font-family: var(--glass-font-heading) !important; }
+.type-glass .store-page :is(.store-brand b, .store-brand small, .store-count small) { font-family: var(--glass-font-sans) !important; }
+.type-glass .store-page-redesign { font-family: var(--glass-font-sans) !important; }
+.type-glass .store-page-redesign .store-topbar-brand span { font-family: var(--glass-font-heading) !important; }
+.type-glass .store-page-redesign .store-topbar-brand small { font-family: var(--glass-font-sans) !important; }

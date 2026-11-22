@@ -19,7 +19,7 @@ import { GlassCard, GlassCardContent, GlassCardDescription, GlassCardHeader, Gla
 import "./glass-tabs.css";
 import "./glass-switch.css";
 import { useWorkspace } from "./workspace-context";
-import { ArrowRight, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, Coffee, Dog, Download, Ellipsis, FileText, LayoutDashboard, LogIn, LogOut, Moon, Paperclip, PartyPopper, Pencil, Plus, Save, Settings, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, Wine, X } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, Coffee, Dog, Download, Ellipsis, FileText, LayoutDashboard, LogIn, LogOut, Moon, Paperclip, PartyPopper, Pencil, Plus, Save, Settings, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, Wine, X, Boxes } from "lucide-react";
 
 type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
 type Attachment = { id: string; name: string; type: string; size: number; pathname?: string; url?: string; data?: string };
@@ -65,6 +65,7 @@ function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
   const [headerSlots, setHeaderSlots] = useState<{ brand: HTMLElement | null; tabs: HTMLElement | null; actions: HTMLElement | null }>({ brand: null, tabs: null, actions: null });
   const [notificationsMenuOpen, setNotificationsMenuOpen] = useState(false);
+  const [adegaChoiceOpen, setAdegaChoiceOpen] = useState(false);
   const notificationsMenuRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     setHeaderSlots({
@@ -90,6 +91,12 @@ function Dashboard() {
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [notificationsMenuOpen]);
+  useEffect(() => {
+    if (!adegaChoiceOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setAdegaChoiceOpen(false); };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [adegaChoiceOpen]);
   const [view, setView] = useState(() => new Date());
   const [selectedDay, setSelectedDay] = useState(() => toISO(new Date()));
   const [selectedId, setSelectedId] = useState("");
@@ -221,6 +228,7 @@ function Dashboard() {
   const addCabin = () => { const name = newCabinName.trim(); if (!name) return; const tones: Cabin["tone"][] = ["violet", "rose", "emerald", "amber"]; setCabins((items) => [...items, { id: crypto.randomUUID(), name, tone: tones[items.length % tones.length] }]); setNewCabinName(""); setNotice("Novo chalé adicionado."); };
   const renameCabin = (id: string, name: string) => { if (!name.trim()) return; setCabins((items) => items.map((item) => item.id === id ? { ...item, name: name.trim() } : item)); };
   const canManageAccounts = headerSlots.actions?.dataset.canManageAccounts === "true";
+  const canManageStore = headerSlots.actions?.dataset.canManageStore === "true";
 
   return <BetaFeedbackContext.Provider value={{ message: beta ? notice : "", dismiss: () => setNotice("") }}><main className="min-h-screen bg-[#fffefa] text-[#22322b]"><section className="min-h-screen w-full overflow-hidden bg-[#fffefa]">
 
@@ -232,7 +240,7 @@ function Dashboard() {
           {notificationsMenuOpen && <div id="main-glass-menu" className="absolute right-0 top-[calc(100%+6px)] z-[90] w-64" role="menu" aria-label="Menu principal">
             <Glass strength={0.3} blur={7} tint={0.16} dome={0.14} radius={18} className="border border-white/25 bg-white/10 shadow-[0_18px_42px_rgba(0,0,0,.28)] dark:border-white/10 dark:bg-[#142019]/45" contentClassName={`relative z-10 grid gap-1 p-2 ${darkMode ? "text-white" : "text-[#22322b]"}`}>
               <button type="button" role="menuitem" onClick={() => { setNotificationsMenuOpen(false); setActiveView("overview"); }} className="flex h-10 items-center gap-3 rounded-xl px-3 text-left text-xs font-semibold text-inherit transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10"><CalendarDays size={16} /> Reservas</button>
-              <a href="/loja" target="_blank" rel="noreferrer" role="menuitem" onClick={() => setNotificationsMenuOpen(false)} className="flex h-10 items-center gap-3 rounded-xl px-3 text-left text-xs font-semibold text-inherit transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10"><Wine size={16} /> Adega</a>
+              <button type="button" role="menuitem" onClick={() => { setNotificationsMenuOpen(false); setAdegaChoiceOpen(true); }} className="flex h-10 items-center gap-3 rounded-xl px-3 text-left text-xs font-semibold text-inherit transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10"><Wine size={16} /> Adega</button>
               <button type="button" role="menuitem" onClick={() => { setNotificationsMenuOpen(false); setActiveView("overview"); setView(new Date()); setSelectedDay(toISO(new Date())); }} className="flex h-10 items-center gap-3 rounded-xl px-3 text-left text-xs font-semibold text-inherit transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10"><Clock3 size={16} /> Agendamentos</button>
               <div role="separator" className="my-1 h-px bg-black/10 dark:bg-white/15" />
               {canManageAccounts && <button type="button" role="menuitem" onClick={() => { setNotificationsMenuOpen(false); window.dispatchEvent(new Event("open-accounts-panel")); }} className="flex h-10 items-center gap-3 rounded-xl px-3 text-left text-xs font-semibold text-inherit transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] dark:hover:bg-white/10"><Users size={16} /> Contas</button>}
@@ -293,7 +301,7 @@ function Dashboard() {
   {draft && <BookingModal draft={draft} cabins={cabins} setDraft={setDraft} onClose={() => setDraft(null)} onSave={saveDraft} onUpload={uploadDocuments} onRemoveDocument={removeDocument} uploadProgress={uploadProgress} />}
   {detailsOpen && selected && <BookingDetails booking={selected} cabin={cabins.find((item) => item.id === selected.cabinId)} onClose={() => setDetailsOpen(false)} onEdit={() => { setDetailsOpen(false); openEdit(selected); }} onDelete={() => removeBooking(selected.id)} onStatus={updateStatus} />}
   {cabinsOpen && <CabinModal cabins={cabins} newName={newCabinName} onName={setNewCabinName} onAdd={addCabin} onRename={renameCabin} onClose={() => setCabinsOpen(false)} />}
-</main></BetaFeedbackContext.Provider>;
+</main>{adegaChoiceOpen && typeof document !== "undefined" && createPortal(<div className="fixed inset-0 z-[200] grid place-items-center bg-black/35 px-4 py-6 backdrop-blur-md" onMouseDown={event => { if (event.target === event.currentTarget) setAdegaChoiceOpen(false); }}><Glass strength={0.12} blur={12} tint={0.1} dome={0.08} radius={24} className="w-full max-w-md border border-white/20 bg-white/[0.08] shadow-[0_24px_80px_rgba(0,0,0,.35)] dark:border-white/15 dark:bg-[#142019]/35" contentClassName={`relative z-10 p-6 sm:p-7 ${darkMode ? "text-white" : "text-[#22322b]"}`}><div role="dialog" aria-modal="true" aria-labelledby="adega-choice-title"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#75b793]">Adega</p><h2 id="adega-choice-title" className="mt-2 text-xl font-bold tracking-tight">O que você deseja abrir?</h2><p className="mt-1 text-sm text-current/70">Escolha uma área para continuar.</p><div className="mt-6 grid gap-3 sm:grid-cols-2"><a href="https://matto-chales.vercel.app" onClick={() => setAdegaChoiceOpen(false)} className="group flex min-h-28 flex-col items-start justify-between rounded-2xl border border-white/20 bg-white/[.08] p-4 transition hover:bg-white/[.15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793]"><Wine size={21} className="text-[#75b793]" /><span><strong className="block text-sm">Loja</strong><small className="mt-1 block text-xs text-current/65">Abrir a loja pública da adega</small></span></a><button type="button" disabled={!canManageStore} title={canManageStore ? "Abrir inventário da adega" : "Disponível para administradores"} onClick={() => { setAdegaChoiceOpen(false); window.dispatchEvent(new Event("open-store-inventory")); }} className="flex min-h-28 flex-col items-start justify-between rounded-2xl border border-white/20 bg-white/[.08] p-4 text-left transition hover:bg-white/[.15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793] disabled:cursor-not-allowed disabled:opacity-50"><Boxes size={21} className="text-[#75b793]" /><span><strong className="block text-sm">Inventário</strong><small className="mt-1 block text-xs text-current/65">{canManageStore ? "Gerenciar itens cadastrados" : "Disponível para administradores"}</small></span></button></div><button type="button" autoFocus onClick={() => setAdegaChoiceOpen(false)} className="mt-5 min-h-10 w-full rounded-xl border border-white/20 bg-white/[.06] text-sm font-semibold text-current/80 transition hover:bg-white/[.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#75b793]">Fechar</button></div></Glass></div>, document.body)}</BetaFeedbackContext.Provider>;
 }
 
 
