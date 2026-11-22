@@ -2,6 +2,7 @@
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { CheckCircle2, Download, Eye, EyeOff, ShieldCheck, TreePalm, X } from "lucide-react";
 import SettingsPanel, { applyTheme, effectiveTheme, type SettingsUser } from "./settings-panel";
+import { Glass } from "@/components/ui/glass";
 import { WorkspaceContext } from "./workspace-context";
 
 type User = SettingsUser;
@@ -59,9 +60,9 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#f4f3ed] text-[#22322b]" role="status">Verificando acesso…</main>;
   if (!user) return <AccessForm initialError={error} firstAdmin={firstAdmin} onLogin={setUser} />;
   return <div className={user.preferences.betaEnabled ? "beta-design" : undefined}><header className="matto-admin-bar">
-    <div id="matto-dashboard-brand" className="matto-dashboard-brand-slot" />
+    <div id="matto-dashboard-brand" className="matto-dashboard-brand-slot"><Glass strength={0.28} blur={7} tint={0.14} dome={0.1} radius={999} className="matto-user-pill" contentClassName="relative z-10 flex items-center gap-2.5 px-3 py-1.5 text-sm font-semibold text-white"><span className="grid size-8 shrink-0 place-items-center rounded-full border border-white/20 bg-white/10 text-white shadow-inner"><svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" strokeLinecap="round" /></svg></span><span className="max-w-44 truncate">{user.name}</span></Glass></div>
     <div id="matto-dashboard-tabs" className="matto-dashboard-tabs-slot" />
-    <nav className="matto-auth-links" aria-label="Conta atual"><span className="matto-auth-user">{user.name}</span></nav>
+
     <div id="matto-dashboard-actions" className="matto-dashboard-actions-slot" data-can-manage-accounts={user.role === "admin" && !user.preferences.betaEnabled ? "true" : "false"} />
   </header>{error && <p role="alert" className="bg-[#fff7f5] p-3 text-center text-[#a65746]">{error}</p>}{managing && !user.preferences.betaEnabled && <Accounts onClose={() => setManaging(false)} />}{settingsOpen && <SettingsPanel user={user} onUser={setUser} onBack={() => setSettingsOpen(false)} accounts={<Accounts onClose={() => setSettingsOpen(false)} />} onCabins={() => { setSettingsOpen(false); window.dispatchEvent(new Event("open-cabin-settings")); }} />}{user.role === "admin" && !user.preferences.betaEnabled && <BackupNotifier />}{user.preferences.betaEnabled && <div role="status" className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5d1af] bg-[#f3e9da] px-5 py-3 text-sm text-[#906a36]"><span><b>MODO BETA</b> · Ambiente de testes pessoal. Dados e anexos reais protegidos.</span><button onClick={() => setSettingsOpen(true)} className="min-h-11 rounded-lg border border-current px-3 font-semibold">Gerenciar Modo Beta</button></div>}<WorkspaceContext.Provider value={{ mode: user.preferences.betaEnabled ? "beta" : "production", documentPrefix: user.preferences.betaEnabled ? `beta/${user.id}/reservas/` : "reservas/" }}><div key={user.preferences.betaEnabled ? "beta" : "production"} hidden={settingsOpen}>{children}</div></WorkspaceContext.Provider></div>;
 }

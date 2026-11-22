@@ -111,6 +111,7 @@ html.dark .selected-booking-eyebrow { color: #a8b8ae !important; }
 .matto-dashboard-actions-slot { grid-column: 3; }
 @media (min-width: 1051px) { .matto-dashboard-tabs-slot { position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%, -50%); } }
 .matto-dashboard-brand { display: flex; align-items: center; gap: 12px; min-width: 195px; }
+.matto-user-pill { width: max-content; max-width: 100%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.04); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
 .matto-dashboard-tabs { display: flex; align-items: center; }
 .matto-auth-links { display: flex; min-width: 0; align-items: center; justify-content: flex-end; gap: 2px; white-space: nowrap; }
 .matto-auth-user { margin-right: 4px; color: #536158; }
