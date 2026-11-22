@@ -40,7 +40,7 @@
 .glass-schedule-day-dots { position: absolute; top: .1rem; right: .1rem; display: flex; gap: .2rem; }
 .glass-schedule-day-dots i { width: .38rem; height: .38rem; border-radius: 999px; }
 .glass-calendar-schedule .calendar-reservation-preview { position: absolute; z-index: 2; top: auto; right: -.42rem; bottom: calc(-.42rem + 3px); left: -.42rem; display: grid; gap: .12rem; box-sizing: border-box; width: auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; opacity: 1; visibility: visible; pointer-events: none; transform: none; }
-.glass-calendar-schedule .calendar-reservation-preview-item { display: block; min-width: 0; margin-inline: 4px; overflow: hidden; padding: .2rem .4rem; border: 1px solid rgba(255,255,255,.12); border-radius: .25rem; font-size: .62rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.glass-calendar-schedule .calendar-reservation-preview-item { display: block; min-width: 0; margin-inline: 6.5px; overflow: hidden; padding: .2rem .4rem; border: 1px solid rgba(255,255,255,.12); border-radius: .25rem; font-size: .62rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
 .glass-calendar-schedule .calendar-reservation-preview-more { color: #b6c8bc; background: rgba(255,255,255,.08); }
 .glass-month-trigger { justify-content: flex-start; }
 .glass-month-popover { max-width: calc(100vw - 1rem); }
