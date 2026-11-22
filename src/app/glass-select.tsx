@@ -14,6 +14,7 @@ export default function GlassSelectMenu({
   ariaLabel,
   disabled = false,
   triggerClassName = "",
+  inlineMenu = false,
 }: {
   value: string;
   options: GlassSelectOption[];
@@ -21,6 +22,7 @@ export default function GlassSelectMenu({
   ariaLabel: string;
   disabled?: boolean;
   triggerClassName?: string;
+  inlineMenu?: boolean;
 }) {
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -32,6 +34,7 @@ export default function GlassSelectMenu({
   const selected = options.find(option => option.value === value);
 
   const place = useCallback(() => {
+    if (inlineMenu) return;
     const rect = trigger.current?.getBoundingClientRect();
     if (!rect) return;
     const dialog = trigger.current?.closest("dialog");
@@ -45,7 +48,7 @@ export default function GlassSelectMenu({
     const visibleBelow = Math.min(window.innerHeight - rect.bottom - 10, dialogRect ? dialogRect.bottom - rect.bottom - 10 : Infinity) / scale;
     const maxHeight = Math.max(40, Math.min(240, visibleBelow));
     setPosition({ left, top, width, maxHeight, strategy: dialog ? "absolute" : "fixed" });
-  }, []);
+  }, [inlineMenu]);
 
   useEffect(() => { setPortal(open ? trigger.current?.closest("dialog") ?? document.body : null); }, [open]);
   useEffect(() => {
@@ -101,11 +104,7 @@ export default function GlassSelectMenu({
     requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-option-index="${next}"]`)?.focus());
   };
 
-  return <>
-    <button ref={trigger} type="button" role="combobox" aria-label={ariaLabel} aria-haspopup="listbox" aria-expanded={open} aria-controls={listboxId} aria-disabled={disabled || undefined} disabled={disabled} onClick={open ? () => setOpen(false) : openMenu} onKeyDown={event => { if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); openMenu(); } }} className={`glass-select-trigger flex h-10 w-full items-center justify-between rounded-xl border border-white/20 bg-[rgba(32,58,65,.38)] px-3 text-left text-xs text-[#f4fafb] shadow-[inset_0_1px_0_rgba(255,255,255,.12)] outline-none backdrop-blur-xl backdrop-saturate-150 transition hover:bg-[rgba(45,77,84,.5)] focus-visible:ring-2 focus-visible:ring-cyan-200/40 disabled:cursor-not-allowed disabled:opacity-50 ${triggerClassName}`}>
-      <span className="truncate">{selected?.label ?? "Selecione uma opção"}</span><ChevronDown size={15} className="ml-2 shrink-0 text-white/70" aria-hidden="true" />
-    </button>
-    {open && portal ? createPortal(<GlassSurface ref={panel} id={listboxId} role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className="glass-select-popup z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]" contentClassName="max-h-[min(15rem,calc(100vh-16px))] overflow-y-auto p-1.5" style={{ position: position.strategy, zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
+  const popup = open ? <GlassSurface ref={panel} id={listboxId} role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className={`${inlineMenu ? "absolute left-0 top-[calc(100%+2px)] w-full" : "fixed"} glass-select-popup z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]`} contentClassName="max-h-[min(15rem,calc(100dvh-16px))] overflow-y-auto p-1.5" style={inlineMenu ? { position: "absolute", zIndex: 100, left: 0, top: "calc(100% + 2px)", width: "100%", maxHeight: 240 } : { position: position.strategy, zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
       {options.map((option, index) => {
         const isSelected = option.value === value;
         const isActive = index === activeIndex;
@@ -113,6 +112,14 @@ export default function GlassSelectMenu({
           <span className="truncate">{option.label}</span>{isSelected && <Check size={14} className="shrink-0 text-[#8fcaa7]" aria-hidden="true" />}
         </button>;
       })}
-    </GlassSurface>, portal) : null}
+    </GlassSurface> : null;
+  return <>
+    <div className={inlineMenu ? `relative ${open ? "z-[130]" : ""}` : undefined}>
+      <button ref={trigger} type="button" role="combobox" aria-label={ariaLabel} aria-haspopup="listbox" aria-expanded={open} aria-controls={listboxId} aria-disabled={disabled || undefined} disabled={disabled} onClick={open ? () => setOpen(false) : openMenu} onKeyDown={event => { if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); openMenu(); } }} className={`glass-select-trigger flex h-10 w-full items-center justify-between rounded-xl border border-white/20 bg-[rgba(32,58,65,.38)] px-3 text-left text-xs text-[#f4fafb] shadow-[inset_0_1px_0_rgba(255,255,255,.12)] outline-none backdrop-blur-xl backdrop-saturate-150 transition hover:bg-[rgba(45,77,84,.5)] focus-visible:ring-2 focus-visible:ring-cyan-200/40 disabled:cursor-not-allowed disabled:opacity-50 ${triggerClassName}`}>
+        <span className="truncate">{selected?.label ?? "Selecione uma opção"}</span><ChevronDown size={15} className="ml-2 shrink-0 text-white/70" aria-hidden="true" />
+      </button>
+      {inlineMenu && popup}
+    </div>
+    {!inlineMenu && popup && portal ? createPortal(popup, portal) : null}
   </>;
 }
