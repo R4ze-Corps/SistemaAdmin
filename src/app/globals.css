@@ -12,6 +12,7 @@ html::-webkit-scrollbar-corner, body::-webkit-scrollbar-corner, *::-webkit-scrol
   background: transparent !important;
 }
 
+@media (min-width: 768px) { html { zoom: .8; } }
 html { color-scheme: light; }
 html.dark { color-scheme: dark; --background: #0c1310; --foreground: #e9f1ec; }
 body, button, input, select, textarea { transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
