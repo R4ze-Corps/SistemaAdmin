@@ -400,7 +400,7 @@ function GlassTimePicker({ label, value, onChange }: { label: string; value: str
     document.addEventListener("pointerdown", outside, true);
     document.addEventListener("keydown", escape, true);
     return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", schedulePlace); window.removeEventListener("scroll", schedulePlace, true); document.removeEventListener("pointerdown", outside, true); document.removeEventListener("keydown", escape, true); };
-  }, [open, portal, place, hour, minute]);
+  }, [open, portal, place]);
   const setTimePart = (nextHour: number, nextMinute: number) => onChange(`${String((nextHour + 24) % 24).padStart(2, "0")}:${String((nextMinute + 60) % 60).padStart(2, "0")}`);
   const hours = Array.from({ length: 24 }, (_, index) => index);
   const minutes = Array.from({ length: 60 }, (_, index) => index);
