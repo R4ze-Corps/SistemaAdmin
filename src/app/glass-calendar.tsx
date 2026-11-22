@@ -138,14 +138,14 @@ export function GlassDatePicker({ label, value, onChange, className = "" }: { la
   const selected = value ? fromISO(value) : undefined;
   const displayValue = selected ? selected.toLocaleDateString("pt-BR") : "Selecionar data";
 
-  return <>
+  return <div className={`relative ${open ? "z-[130]" : ""}`}>
     <button ref={trigger} type="button" className={`glass-calendar-trigger ${className}`} aria-label={`${label}: ${displayValue}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setMonth(value ? fromISO(value) : new Date()); place(); setOpen(current => !current); }}>
       <span>{displayValue}</span><CalendarDays size={16} aria-hidden="true" />
     </button>
-    {open && createPortal(<div ref={panel} role="dialog" aria-label={`Calendário: ${label}`} className="glass-calendar-popover" style={{ left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }}>
+    {open && <div ref={panel} role="dialog" aria-label={`Calendário: ${label}`} className="glass-calendar-popover absolute z-[120]" style={{ position: "absolute", left: 0, top: "calc(100% + 8px)", width: position.width, maxHeight: position.maxHeight }}>
       <GlassCalendar month={month} onMonthChange={setMonth} selected={selected} onSelect={date => { onChange(toISO(date)); setMonth(new Date(date.getFullYear(), date.getMonth(), 1)); setOpen(false); trigger.current?.focus(); }} />
-    </div>, document.body)}
-  </>;
+    </div>}
+  </div>;
 }
 
 export function GlassMonthPicker({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
