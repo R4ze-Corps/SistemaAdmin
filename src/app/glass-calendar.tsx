@@ -90,10 +90,13 @@ function usePopoverPosition(trigger: React.RefObject<HTMLButtonElement | null>, 
   const place = useCallback(() => {
     const rect = trigger.current?.getBoundingClientRect();
     if (!rect) return;
-    const actualWidth = Math.min(width, window.innerWidth - 16);
-    const left = Math.max(8, Math.min(rect.left, window.innerWidth - actualWidth - 8));
-    const top = rect.bottom + 8;
-    const availableHeight = Math.max(96, window.innerHeight - top - 8);
+    const zoom = Number.parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    const viewportWidth = window.innerWidth / zoom;
+    const viewportHeight = window.innerHeight / zoom;
+    const actualWidth = Math.min(width, viewportWidth - 16);
+    const left = Math.max(8, Math.min(rect.left / zoom, viewportWidth - actualWidth - 8));
+    const top = rect.bottom / zoom + 8;
+    const availableHeight = Math.max(96, viewportHeight - top - 8);
     const maxHeight = Math.min(360, availableHeight);
     setPosition({ left, top, width: actualWidth, maxHeight });
   }, [trigger, width]);
