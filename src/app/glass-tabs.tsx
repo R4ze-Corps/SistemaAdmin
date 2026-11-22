@@ -29,7 +29,8 @@ export default function GlassTabs<T extends string>({
       if (!list || !active) return;
       const listRect = list.getBoundingClientRect();
       const activeRect = active.getBoundingClientRect();
-      setIndicator({ x: activeRect.left - listRect.left, width: activeRect.width, ready: true });
+      const pageZoom = Number.parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+      setIndicator({ x: (activeRect.left - listRect.left) / pageZoom, width: activeRect.width / pageZoom, ready: true });
     };
     measure();
     const observer = new ResizeObserver(measure);
