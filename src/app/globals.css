@@ -152,6 +152,7 @@ html:not(.dark) .glass-time-popup [class*="border-white/25"] { border-color: rgb
 html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: rgba(75,104,86,.08) !important; }
 .overview-calendar-layout { min-width: 0; }
 .selected-day-panel[aria-hidden="true"] { visibility: hidden; transition: opacity .5s ease-in-out, transform .5s ease-in-out, padding .5s ease-in-out, border-color .5s ease-in-out, visibility 0s linear .5s; }
+@media (min-width: 768px) { .auth-01-page { min-height: 125vh !important; } }
 .auth-01-page { background: radial-gradient(ellipse at 18% 86%, rgba(30,88,168,.5), transparent 43%), radial-gradient(ellipse at 88% 42%, rgba(7,115,139,.28), transparent 42%), linear-gradient(155deg, #070d18 0%, #101c32 52%, #142a50 100%); }
 .auth-01-aurora { position: absolute; z-index: 0; width: min(34rem, 78vw); aspect-ratio: 1; border-radius: 999px; opacity: .5; filter: blur(82px); pointer-events: none; }
 .auth-01-aurora-one { top: -18%; left: -12%; background: radial-gradient(circle, rgba(40,120,224,.55), rgba(28,76,149,.16) 58%, transparent 72%); }
