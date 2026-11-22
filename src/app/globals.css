@@ -236,3 +236,17 @@ html:not(.dark) .glass-time-popup [class*="bg-white/[.08]"] { background-color: 
 .type-glass .store-page-redesign { font-family: var(--glass-font-sans) !important; }
 .type-glass .store-page-redesign .store-topbar-brand span { font-family: var(--glass-font-heading) !important; }
 .type-glass .store-page-redesign .store-topbar-brand small { font-family: var(--glass-font-sans) !important; }
+
+/* Launcher home: quiet aurora, soft glass tiles and a restrained entrance. */
+.launcher-screen { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 13% 8%, rgba(112,166,132,.13), transparent 36%), radial-gradient(ellipse at 91% 84%, rgba(122,166,137,.1), transparent 34%); }
+html.dark .launcher-screen { background: radial-gradient(ellipse at 13% 8%, rgba(58,118,81,.18), transparent 36%), radial-gradient(ellipse at 91% 84%, rgba(48,105,75,.12), transparent 34%); }
+.launcher-screen > div { animation: launcher-home-in .55s cubic-bezier(.2,.7,.2,1) both; }
+.launcher-glass-card { height: 100%; transition: border-color .25s ease, box-shadow .25s ease; }
+.launcher-glass-card:hover { border-color: rgba(117,183,147,.4); box-shadow: 0 24px 70px rgba(9,25,17,.13); }
+.launcher-card-orb { position: absolute; top: 5.5rem; right: -5.5rem; width: 15rem; aspect-ratio: 1; border-radius: 9999px; opacity: .28; filter: blur(50px); pointer-events: none; transition: transform .45s ease, opacity .35s ease; }
+.launcher-card-orb-reservas { background: radial-gradient(circle, rgba(103,177,131,.68), rgba(103,177,131,0) 70%); }
+.launcher-card-orb-adega { background: radial-gradient(circle, rgba(197,159,93,.68), rgba(197,159,93,0) 70%); }
+.launcher-card-orb-agendamentos { background: radial-gradient(circle, rgba(107,157,169,.62), rgba(107,157,169,0) 70%); }
+.launcher-glass-card:hover .launcher-card-orb { transform: scale(1.16) translate(-4%, 3%); opacity: .5; }
+@keyframes launcher-home-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .launcher-screen > div { animation: none; } .launcher-glass-card, .launcher-card-orb { transition: none; } }
