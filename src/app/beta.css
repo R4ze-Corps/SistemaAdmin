@@ -79,3 +79,4 @@ html.dark .beta-design {
   html.dark .beta-design { --beta-secondary: #e9f1ec; --beta-border: #e9f1ec; }
   .beta-design button, .beta-design a { text-decoration-thickness: 2px; }
 }
+.beta-design [data-beta-day] .truncate { overflow: hidden; overflow-wrap: normal; white-space: nowrap; text-overflow: ellipsis; }
