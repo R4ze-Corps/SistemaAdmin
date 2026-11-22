@@ -1,6 +1,7 @@
 "use client";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
-import { CheckCircle2, Download, Eye, EyeOff, ShieldCheck, X } from "lucide-react";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { Camera, CheckCircle2, Download, Eye, EyeOff, ShieldCheck, X } from "lucide-react";
 import SettingsPanel, { applyTheme, effectiveTheme, type SettingsUser } from "./settings-panel";
 import { Glass, GlassSurface } from "@/components/ui/glass";
 import { WorkspaceContext } from "./workspace-context";
@@ -60,7 +61,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   if (loading) return <main className="grid min-h-screen place-items-center text-[#1f4b3a]" role="status" aria-label="Verificando acesso"><><svg aria-hidden="true" viewBox="0 0 24 24" className="size-7 animate-[spin_.9s_steps(8)_infinite] motion-reduce:animate-[spin_2.4s_steps(8)_infinite]"><>{Array.from({ length: 8 }, (_, i) => <line key={i} x1="12" y1="3" x2="12" y2="7.5" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeOpacity={0.25 + (0.75 * (i + 1)) / 8} transform={`rotate(${i * 45} 12 12)`} />)}</></svg><span className="sr-only">Verificando acesso…</span></></main>;
   if (!user) return <AccessForm initialError={error} firstAdmin={firstAdmin} onLogin={setUser} />;
   return <div className={user.preferences.betaEnabled ? "beta-design" : undefined}><header className="matto-admin-bar">
-    <div id="matto-dashboard-brand" className="matto-dashboard-brand-slot"><Glass strength={0.28} blur={7} tint={0.14} dome={0.1} radius={999} className="matto-user-pill" contentClassName="relative z-10 flex items-center gap-2.5 px-3 py-1.5 text-sm font-semibold text-[#26372e] dark:text-white"><span className="matto-user-avatar grid size-8 shrink-0 place-items-center rounded-full border border-[#1f4b3a]/20 bg-[#1f4b3a]/10 text-[#1f4b3a] shadow-inner dark:border-white/20 dark:bg-white/10 dark:text-white"><svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" strokeLinecap="round" /></svg></span><span className="max-w-44 truncate">{user.name}</span></Glass></div>
+    <div id="matto-dashboard-brand" className="matto-dashboard-brand-slot"><Glass strength={0.28} blur={7} tint={0.14} dome={0.1} radius={999} className="matto-user-pill" contentClassName="relative z-10 flex items-center gap-2.5 px-3 py-1.5 text-sm font-semibold text-[#26372e] dark:text-white"><span className="matto-user-avatar grid size-8 shrink-0 place-items-center overflow-hidden rounded-full border border-[#1f4b3a]/20 bg-[#1f4b3a]/10 text-[#1f4b3a] shadow-inner dark:border-white/20 dark:bg-white/10 dark:text-white">{user.avatarUrl ? <Image src={user.avatarUrl} alt="" width={32} height={32} unoptimized className="size-full object-cover" /> : <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" strokeLinecap="round" /></svg>}</span><span className="max-w-44 truncate">{user.name}</span></Glass></div>
     <div id="matto-dashboard-tabs" className="matto-dashboard-tabs-slot" />
 
     <div id="matto-dashboard-actions" className="matto-dashboard-actions-slot" data-can-manage-accounts={user.role === "admin" && !user.preferences.betaEnabled ? "true" : "false"} />
@@ -71,13 +72,24 @@ function AccessForm({ initialError, firstAdmin, onLogin }: { initialError: strin
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(initialError);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarPreviewRef = useRef<string | null>(null);
+  useEffect(() => () => { if (avatarPreviewRef.current) URL.revokeObjectURL(avatarPreviewRef.current); }, []);
+  function selectAvatar(file: File | null) {
+    if (avatarPreviewRef.current) URL.revokeObjectURL(avatarPreviewRef.current);
+    const preview = file ? URL.createObjectURL(file) : null;
+    avatarPreviewRef.current = preview;
+    setAvatarPreview(preview);
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     if (register && form.get("password") !== form.get("confirmation")) { setMessage("As senhas não coincidem."); return; }
     setBusy(true); setMessage("");
     try {
-      const data = await api(`/api/auth/${register ? "register" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(form)) });
+      const data = register
+        ? await api("/api/auth/register", { method: "POST", body: form })
+        : await api("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(form)) });
       if (data.user) onLogin(data.user);
       else { setRegister(false); setMessage(data.message); }
     } catch (error) { setMessage(error instanceof Error ? error.message : "Erro de conexão."); }
@@ -93,7 +105,16 @@ function AccessForm({ initialError, firstAdmin, onLogin }: { initialError: strin
         <p className="mt-2 text-sm leading-5 text-white/65">{register ? firstAdmin ? "Configure o primeiro acesso administrativo." : "Solicite acesso ao painel de gestão." : "Entre para continuar de onde você parou."}</p>
       </header>
       <form onSubmit={submit} className="flex flex-col gap-4">
-        {register && <div className="grid gap-1"><label htmlFor="auth-display-name" className="text-xs font-medium text-white/75">Nome de exibição</label><input id="auth-display-name" className={field} name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Como devemos chamar você?" /></div>}
+        {register && <>
+          <div className="grid gap-1"><label htmlFor="auth-display-name" className="text-xs font-medium text-white/75">Nome de exibição</label><input id="auth-display-name" className={field} name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Como devemos chamar você?" /></div>
+          <div className="flex items-center gap-3">
+            <label htmlFor="auth-avatar" className="group relative grid size-16 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-full border border-white/25 bg-white/10 text-white/75 transition hover:border-[#9dcaff]/75 hover:bg-white/15">
+              {avatarPreview ? <Image src={avatarPreview} alt="Prévia da foto de perfil" width={64} height={64} unoptimized className="size-full object-cover" /> : <Camera size={22} />}
+              <input id="auth-avatar" name="avatar" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/avif,image/bmp,.jfif,.jpe,.jpg,.jpeg,.png,.gif,.webp,.avif,.bmp" className="sr-only" onChange={event => { const file = event.currentTarget.files?.[0] ?? null; if (file && file.size > 4 * 1024 * 1024) { selectAvatar(null); setMessage("A foto deve ter até 4 MB."); event.currentTarget.value = ""; return; } setMessage(""); selectAvatar(file); }} />
+            </label>
+            <div className="min-w-0"><p className="text-sm font-semibold text-white/90">Foto de perfil <span className="font-normal text-white/50">(opcional)</span></p><p className="mt-1 text-[10px] leading-4 text-white/55">GIF, JPEG/JFIF, PNG, WebP, AVIF ou BMP · até 4 MB</p><p className="text-[10px] leading-4 text-white/40">GIFs animados são preservados.</p></div>
+          </div>
+        </>}
         <div className="grid gap-1"><label htmlFor="auth-username" className="text-sm font-semibold text-white/90">Usuário</label><input id="auth-username" className={field} name="username" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} minLength={3} maxLength={50} placeholder="Ex.: kawan" required /><span className="text-[10px] leading-4 text-white/45">3 a 50 caracteres; não diferencia maiúsculas e minúsculas.</span></div>
         <div className="grid gap-1"><div className="flex items-center justify-between"><label htmlFor="auth-password" className="text-sm font-semibold text-white/90">Senha</label></div><div className="relative"><input id="auth-password" className={`${field} pr-12`} name="password" type={show ? "text" : "password"} minLength={4} maxLength={register ? 8 : 128} autoComplete={register ? "new-password" : "current-password"} required placeholder="Digite sua senha" /><button type="button" className="absolute right-0 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-lg text-white/55 transition hover:text-white" aria-label={show ? "Ocultar senha" : "Mostrar senha"} aria-pressed={show} onClick={() => setShow(!show)}>{show ? <EyeOff size={17} /> : <Eye size={17} />}</button></div><span className="text-[10px] leading-4 text-white/45">{register ? "De 4 a 8 caracteres." : "Senhas antigas mais longas continuam válidas."}</span></div>
         {register && <div className="grid gap-1"><label htmlFor="auth-confirm-password" className="text-xs font-medium text-white/75">Confirmar senha</label><input id="auth-confirm-password" className={field} name="confirmation" type="password" autoComplete="new-password" required minLength={4} maxLength={8} placeholder="Digite a senha novamente" /></div>}

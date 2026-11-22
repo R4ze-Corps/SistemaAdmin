@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { Account, AuthError, authFailure, createSession, currentAccount, endSession, hashPassword, legacyLoginFilter, normalizeLogin, publicAccount, rateLimit, sameOrigin, validLogin, verifyPassword } from "@/lib/auth";
 import { getDatabase } from "@/lib/mongodb";
 import { registerAccount } from "@/lib/register-account";
+import { deleteProfileImage, maxProfileImageBytes, storeProfileImage } from "@/lib/profile-images";
 
 export const runtime = "nodejs";
 type Context = { params: Promise<{ action: string }> };
@@ -23,8 +24,19 @@ export async function POST(request: Request, context: Context) {
     const { action } = await context.params;
     if (action === "logout") { await endSession(); return Response.json({ ok: true }); }
     if (!["login", "register"].includes(action)) throw new AuthError("Rota não encontrada.", 404);
-    if (Number(request.headers.get("content-length") || 0) > 4096) throw new AuthError("Solicitação muito grande.", 413);
-    const body = await request.json().catch(() => { throw new AuthError("Dados inválidos.", 400); });
+    const contentType = request.headers.get("content-type") || "";
+    const multipartRegister = action === "register" && contentType.toLowerCase().includes("multipart/form-data");
+    if (Number(request.headers.get("content-length") || 0) > (multipartRegister ? maxProfileImageBytes + 128_000 : 4096)) throw new AuthError("Solicitação muito grande.", 413);
+    let body: Record<string, FormDataEntryValue>;
+    let avatarFile: File | null = null;
+    if (multipartRegister) {
+      const form = await request.formData().catch(() => { throw new AuthError("Dados inválidos.", 400); });
+      body = Object.fromEntries(form.entries());
+      const avatar = form.get("avatar");
+      if (avatar instanceof File && avatar.size > 0) avatarFile = avatar;
+    } else {
+      body = await request.json().catch(() => { throw new AuthError("Dados inválidos.", 400); });
+    }
     const username = normalizeLogin(body.username);
     const password = typeof body.password === "string" ? body.password : "";
     if (!validLogin(username)) throw new AuthError("Informe um nome de login de 3 a 50 caracteres (letras, números, espaços, ponto, hífen ou sublinhado).", 400);
@@ -48,8 +60,18 @@ export async function POST(request: Request, context: Context) {
         }
       }
       const user: Account = { _id: new ObjectId(), name, username, passwordHash: await hashPassword(password), role: "member", status: "pending", createdAt: new Date() };
-      try { await registerAccount(user); }
-      catch (error) { if ((error as { code?: number }).code === 11000) throw new AuthError("Não foi possível criar esta conta. Tente entrar ou contate o administrador.", 409); throw error; }
+      try {
+        if (avatarFile) {
+          const image = await storeProfileImage(avatarFile, user._id);
+          user.avatarId = image.id;
+          user.avatarUpdatedAt = new Date();
+        }
+        await registerAccount(user);
+      } catch (error) {
+        if (user.avatarId) await deleteProfileImage(user.avatarId).catch(() => undefined);
+        if ((error as { code?: number }).code === 11000) throw new AuthError("Não foi possível criar esta conta. Tente entrar ou contate o administrador.", 409);
+        throw error;
+      }
       const admin = user.role === "admin";
       if (admin) await createSession(user);
       return Response.json({ user: admin ? publicAccount(user) : null, pending: !admin, message: admin ? "Conta administradora criada." : "Cadastro recebido. Aguarde a aprovação do administrador." }, { status: 201 });
