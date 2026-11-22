@@ -25,6 +25,12 @@
 html.dark .glass-calendar-trigger { color: #eaf2ec; border-color: rgba(165,205,180,.24); background: rgba(18,34,27,.36); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 5px 18px rgba(0,0,0,.08); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); }
 html.dark .glass-calendar-trigger:hover, html.dark .glass-calendar-trigger[aria-expanded="true"] { color: #f5fbf6; border-color: rgba(165,205,180,.4); background: rgba(29,54,42,.48); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 7px 20px rgba(0,0,0,.14); }
 html.dark .glass-calendar-trigger svg { color: #9bc9aa; }
+html.dark .glass-calendar-popover .glass-calendar { color: #eaf2ec; }
+html.dark .glass-calendar-popover .glass-calendar-weekday { color: #a9bdb0; }
+html.dark .glass-calendar-popover .glass-calendar-day-button { color: #e4eee7; }
+html.dark .glass-calendar-popover .glass-calendar-day-button:hover { background: rgba(213,238,222,.13); }
+html.dark .glass-calendar-popover .glass-calendar-outside .glass-calendar-day-button { color: #91a397; }
+html.dark .glass-calendar-popover .glass-calendar-day-button[data-today="true"]:not([data-selected-single="true"]) { color: #d4eadb; border-color: #78ae8c; }
 .glass-calendar-popover { position: fixed; z-index: 120; overflow: visible; padding: .65rem; border: 1px solid rgba(255,255,255,.3); border-radius: 1.1rem; color: #e9f1ec; background: rgba(19,35,27,.88); box-shadow: 0 18px 48px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); -webkit-backdrop-filter: blur(24px) saturate(155%); backdrop-filter: blur(24px) saturate(155%); animation: glass-calendar-in .16s ease-out both; }
 .glass-calendar-popover .glass-calendar-day-button[data-selected-single="true"] { color: #193629; background: #c6e8d1; }
 .glass-calendar-schedule .glass-calendar-caption { display: none; }
