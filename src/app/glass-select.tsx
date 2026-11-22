@@ -27,18 +27,24 @@ export default function GlassSelectMenu({
   const listboxId = `glass-select-${useId().replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(Math.max(0, options.findIndex(option => option.value === value)));
-  const [position, setPosition] = useState({ left: 8, top: 8, width: 220, maxHeight: 240 });
+  const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number; strategy: "fixed" | "absolute" }>({ left: 8, top: 8, width: 220, maxHeight: 240, strategy: "fixed" });
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   const selected = options.find(option => option.value === value);
 
   const place = useCallback(() => {
     const rect = trigger.current?.getBoundingClientRect();
     if (!rect) return;
-    const width = Math.min(rect.width, window.innerWidth - 16);
-    const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
-    const top = rect.bottom + 2;
-    const maxHeight = Math.max(40, Math.min(240, window.innerHeight - top - 8));
-    setPosition({ left, top, width, maxHeight });
+    const dialog = trigger.current?.closest("dialog");
+    const dialogRect = dialog?.getBoundingClientRect();
+    const scale = dialog && dialog.offsetWidth ? (dialogRect?.width ?? dialog.offsetWidth) / dialog.offsetWidth : 1;
+    const width = Math.min(rect.width / scale, (dialog?.clientWidth ?? window.innerWidth) - 16);
+    const localLeft = (rect.left - (dialogRect?.left ?? 0)) / scale + (dialog?.scrollLeft ?? 0);
+    const left = Math.max(8, Math.min(localLeft, (dialog?.clientWidth ?? window.innerWidth) - width - 8));
+    const localTop = (rect.bottom - (dialogRect?.top ?? 0)) / scale + (dialog?.scrollTop ?? 0) + 2;
+    const top = localTop;
+    const visibleBelow = Math.min(window.innerHeight - rect.bottom - 10, dialogRect ? dialogRect.bottom - rect.bottom - 10 : Infinity) / scale;
+    const maxHeight = Math.max(40, Math.min(240, visibleBelow));
+    setPosition({ left, top, width, maxHeight, strategy: dialog ? "absolute" : "fixed" });
   }, []);
 
   useEffect(() => { setPortal(open ? trigger.current?.closest("dialog") ?? document.body : null); }, [open]);
@@ -99,7 +105,7 @@ export default function GlassSelectMenu({
     <button ref={trigger} type="button" role="combobox" aria-label={ariaLabel} aria-haspopup="listbox" aria-expanded={open} aria-controls={listboxId} aria-disabled={disabled || undefined} disabled={disabled} onClick={open ? () => setOpen(false) : openMenu} onKeyDown={event => { if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); openMenu(); } }} className={`glass-select-trigger flex h-10 w-full items-center justify-between rounded-xl border border-white/20 bg-[rgba(32,58,65,.38)] px-3 text-left text-xs text-[#f4fafb] shadow-[inset_0_1px_0_rgba(255,255,255,.12)] outline-none backdrop-blur-xl backdrop-saturate-150 transition hover:bg-[rgba(45,77,84,.5)] focus-visible:ring-2 focus-visible:ring-cyan-200/40 disabled:cursor-not-allowed disabled:opacity-50 ${triggerClassName}`}>
       <span className="truncate">{selected?.label ?? "Selecione uma opção"}</span><ChevronDown size={15} className="ml-2 shrink-0 text-white/70" aria-hidden="true" />
     </button>
-    {open && portal ? createPortal(<GlassSurface ref={panel} id={listboxId} role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className="glass-select-popup fixed z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]" contentClassName="max-h-[min(15rem,calc(100vh-16px))] overflow-y-auto p-1.5" style={{ position: "fixed", zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
+    {open && portal ? createPortal(<GlassSurface ref={panel} id={listboxId} role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className="glass-select-popup z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]" contentClassName="max-h-[min(15rem,calc(100vh-16px))] overflow-y-auto p-1.5" style={{ position: position.strategy, zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
       {options.map((option, index) => {
         const isSelected = option.value === value;
         const isActive = index === activeIndex;

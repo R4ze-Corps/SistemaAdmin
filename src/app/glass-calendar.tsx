@@ -85,18 +85,18 @@ export function GlassCalendar({
   </div>;
 }
 
-function usePopoverPosition(trigger: React.RefObject<HTMLButtonElement | null>, panel: React.RefObject<HTMLDivElement | null>, width: number) {
-  const [position, setPosition] = useState({ left: 8, top: 8, width });
+function usePopoverPosition(trigger: React.RefObject<HTMLButtonElement | null>, width: number) {
+  const [position, setPosition] = useState({ left: 8, top: 8, width, maxHeight: 360 });
   const place = useCallback(() => {
     const rect = trigger.current?.getBoundingClientRect();
     if (!rect) return;
     const actualWidth = Math.min(width, window.innerWidth - 16);
-    const height = panel.current?.offsetHeight ?? 360;
     const left = Math.max(8, Math.min(rect.left, window.innerWidth - actualWidth - 8));
-    const below = rect.bottom + 8;
-    const top = below + height <= window.innerHeight - 8 ? below : Math.max(8, rect.top - height - 8);
-    setPosition({ left, top, width: actualWidth });
-  }, [trigger, panel, width]);
+    const top = rect.bottom + 8;
+    const availableHeight = Math.max(96, window.innerHeight - top - 8);
+    const maxHeight = Math.min(360, availableHeight);
+    setPosition({ left, top, width: actualWidth, maxHeight });
+  }, [trigger, width]);
   return { position, place };
 }
 
@@ -133,7 +133,7 @@ export function GlassDatePicker({ label, value, onChange, className = "" }: { la
   const panel = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(() => value ? fromISO(value) : new Date());
-  const { position, place } = usePopoverPosition(trigger, panel, 304);
+  const { position, place } = usePopoverPosition(trigger, 304);
   usePopoverEvents(open, setOpen, trigger, panel, place);
   const selected = value ? fromISO(value) : undefined;
   const displayValue = selected ? selected.toLocaleDateString("pt-BR") : "Selecionar data";
@@ -142,7 +142,7 @@ export function GlassDatePicker({ label, value, onChange, className = "" }: { la
     <button ref={trigger} type="button" className={`glass-calendar-trigger ${className}`} aria-label={`${label}: ${displayValue}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setMonth(value ? fromISO(value) : new Date()); place(); setOpen(current => !current); }}>
       <span>{displayValue}</span><CalendarDays size={16} aria-hidden="true" />
     </button>
-    {open && createPortal(<div ref={panel} role="dialog" aria-label={`Calendário: ${label}`} className="glass-calendar-popover" style={{ left: position.left, top: position.top, width: position.width }}>
+    {open && createPortal(<div ref={panel} role="dialog" aria-label={`Calendário: ${label}`} className="glass-calendar-popover" style={{ left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }}>
       <GlassCalendar month={month} onMonthChange={setMonth} selected={selected} onSelect={date => { onChange(toISO(date)); setMonth(new Date(date.getFullYear(), date.getMonth(), 1)); setOpen(false); trigger.current?.focus(); }} />
     </div>, document.body)}
   </>;
@@ -153,7 +153,7 @@ export function GlassMonthPicker({ label, value, onChange }: { label: string; va
   const panel = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [year, setYear] = useState(() => Number(value.slice(0, 4)) || new Date().getFullYear());
-  const { position, place } = usePopoverPosition(trigger, panel, 296);
+  const { position, place } = usePopoverPosition(trigger, 296);
   usePopoverEvents(open, setOpen, trigger, panel, place);
   const [yearText, monthText] = value.split("-").map(Number);
   const displayValue = value ? new Date(yearText, monthText - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) : "Selecionar mês";
@@ -163,7 +163,7 @@ export function GlassMonthPicker({ label, value, onChange }: { label: string; va
     <button ref={trigger} type="button" className="glass-calendar-trigger glass-month-trigger" aria-label={`${label}: ${displayValue}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setYear(Number(value.slice(0, 4)) || new Date().getFullYear()); place(); setOpen(current => !current); }}>
       <CalendarDays size={16} aria-hidden="true" /><span className="capitalize">{displayValue}</span>
     </button>
-    {open && createPortal(<div ref={panel} role="dialog" aria-label={`Selecionar ${label}`} className="glass-calendar-popover glass-month-popover" style={{ left: position.left, top: position.top, width: position.width }}>
+    {open && createPortal(<div ref={panel} role="dialog" aria-label={`Selecionar ${label}`} className="glass-calendar-popover glass-month-popover" style={{ left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }}>
       <div className="glass-month-heading"><button type="button" aria-label="Ano anterior" onClick={() => setYear(current => current - 1)}>‹</button><strong>{year}</strong><button type="button" aria-label="Próximo ano" onClick={() => setYear(current => current + 1)}>›</button></div>
       <div className="glass-month-grid">{monthNames.map((name, index) => { const monthValue = `${year}-${String(index + 1).padStart(2, "0")}`; return <button key={monthValue} type="button" aria-pressed={value === monthValue} onClick={() => { onChange(monthValue); setOpen(false); trigger.current?.focus(); }}>{name}</button>; })}</div>
     </div>, document.body)}

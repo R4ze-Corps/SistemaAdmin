@@ -282,18 +282,24 @@ function GlassTimePicker({ label, value, onChange }: { label: string; value: str
   const hourList = useRef<HTMLDivElement>(null);
   const minuteList = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [position, setPosition] = useState({ left: 8, top: 8 });
+  const [position, setPosition] = useState<{ left: number; top: number; maxHeight: number; wheelHeight: number; strategy: "fixed" | "absolute" }>({ left: 8, top: 8, maxHeight: 204, wheelHeight: 160, strategy: "fixed" });
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   const [hour, minute] = (value || "14:00").split(":").map((part) => Number(part) || 0);
   const place = useCallback(() => {
     const rect = trigger.current?.getBoundingClientRect();
     if (!rect) return;
+    const dialog = trigger.current?.closest("dialog");
+    const dialogRect = dialog?.getBoundingClientRect();
+    const scale = dialog && dialog.offsetWidth ? (dialogRect?.width ?? dialog.offsetWidth) / dialog.offsetWidth : 1;
     const width = 204;
-    const height = 204;
-    const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
-    const below = rect.bottom + 5;
-    const top = below + height <= window.innerHeight - 8 ? below : Math.max(8, rect.top - height - 5);
-    setPosition({ left, top });
+    const localLeft = (rect.left - (dialogRect?.left ?? 0)) / scale + (dialog?.scrollLeft ?? 0);
+    const left = Math.max(8, Math.min(localLeft, (dialog?.clientWidth ?? window.innerWidth) - width - 8));
+    const top = (rect.bottom - (dialogRect?.top ?? 0)) / scale + (dialog?.scrollTop ?? 0) + 5;
+    const visibleBelow = Math.min(window.innerHeight - rect.bottom - 13, dialogRect ? dialogRect.bottom - rect.bottom - 13 : Infinity) / scale;
+    const availableHeight = Math.max(72, visibleBelow);
+    const maxHeight = Math.min(204, availableHeight);
+    const wheelHeight = Math.max(32, maxHeight - 44);
+    setPosition({ left, top, maxHeight, wheelHeight, strategy: dialog ? "absolute" : "fixed" });
   }, []);
   useEffect(() => { if (open) setPortal(trigger.current?.closest("dialog") ?? document.body); else setPortal(null); }, [open]);
   useEffect(() => {
@@ -317,8 +323,8 @@ function GlassTimePicker({ label, value, onChange }: { label: string; value: str
   const minutes = Array.from({ length: 60 }, (_, index) => index);
   const renderWheel = (title: string, values: number[], selected: number, listRef: React.RefObject<HTMLDivElement | null>, onPick: (value: number) => void) => <div className="min-w-0 flex-1">
     <p className="mb-1 text-center text-[9px] font-semibold uppercase tracking-[.12em] text-white/55">{title}</p>
-    <div className="relative h-40 overflow-hidden rounded-xl border border-white/10 bg-black/10">
-      <div ref={listRef} role="listbox" aria-label={title} tabIndex={0} onScroll={(event) => { const index = Math.max(0, Math.min(values.length - 1, Math.round(event.currentTarget.scrollTop / 32))); if (index !== selected) onPick(index); }} className="relative z-[1] h-full overflow-y-auto py-16 text-center [scrollbar-width:none] [scroll-snap-type:y_mandatory] [&::-webkit-scrollbar]:hidden">
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black/10" style={{ height: position.wheelHeight }}>
+      <div ref={listRef} role="listbox" aria-label={title} tabIndex={0} onScroll={(event) => { const index = Math.max(0, Math.min(values.length - 1, Math.round(event.currentTarget.scrollTop / 32))); if (index !== selected) onPick(index); }} className="relative z-[1] h-full overflow-y-auto text-center [scrollbar-width:none] [scroll-snap-type:y_mandatory] [&::-webkit-scrollbar]:hidden" style={{ paddingBlock: Math.max(0, position.wheelHeight / 2 - 16) }}>
         {values.map((item) => <button key={item} type="button" role="option" aria-selected={item === selected} onClick={() => { onPick(item); listRef.current?.scrollTo({ top: item * 32, behavior: "smooth" }); }} className={`flex h-8 w-full snap-center items-center justify-center text-sm tabular-nums transition ${item === selected ? "font-semibold text-white" : "text-white/45 hover:text-white/75"}`}>{String(item).padStart(2, "0")}</button>)}
       </div>
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-1 top-1/2 z-[2] h-8 -translate-y-1/2 rounded-lg border border-white/25 bg-white/[.08] shadow-[inset_0_1px_0_rgba(255,255,255,.08)]" />
@@ -330,8 +336,8 @@ function GlassTimePicker({ label, value, onChange }: { label: string; value: str
     <button ref={trigger} type="button" aria-label={`${label}: ${value}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (open) setOpen(false); else { place(); setOpen(true); } }} className="glass-time-trigger flex h-10 w-full items-center justify-between rounded-lg border border-white/15 bg-white/[.04] px-3 text-left text-xs font-semibold text-white outline-none transition hover:bg-white/[.08] focus-visible:ring-2 focus-visible:ring-[#75a385]/40">
       <span className="tabular-nums">{value}</span><Clock3 size={15} className="shrink-0 text-white/70" aria-hidden="true" />
     </button>
-    {open && portal ? createPortal(<GlassSurface ref={panel} role="dialog" aria-label={`Selecionar ${label.toLocaleLowerCase()}`} className="glass-time-popup fixed z-[110] overflow-hidden border border-white/20 text-white shadow-[0_18px_50px_rgba(0,0,0,.42)]" contentClassName="p-2" style={{ position: "fixed", zIndex: 110, left: position.left, top: position.top, width: 204, maxHeight: 204 }} tint={0.22} blur={18} saturation={1.65} radius={16} specular>
-      <div className="flex gap-2">{renderWheel("Hora", hours, hour, hourList, (next) => setTimePart(next, minute))}<div className="mt-5 flex h-40 items-center text-lg text-white/35">:</div>{renderWheel("Minuto", minutes, minute, minuteList, (next) => setTimePart(hour, next))}</div>
+    {open && portal ? createPortal(<GlassSurface ref={panel} role="dialog" aria-label={`Selecionar ${label.toLocaleLowerCase()}`} className="glass-time-popup z-[110] overflow-hidden border border-white/20 text-white shadow-[0_18px_50px_rgba(0,0,0,.42)]" contentClassName="p-2" style={{ position: position.strategy, zIndex: 110, left: position.left, top: position.top, width: 204, maxHeight: position.maxHeight }} tint={0.22} blur={18} saturation={1.65} radius={16} specular>
+      <div className="flex gap-2">{renderWheel("Hora", hours, hour, hourList, (next) => setTimePart(next, minute))}<div className="flex items-center text-lg text-white/35" style={{ height: position.wheelHeight }}>:</div>{renderWheel("Minuto", minutes, minute, minuteList, (next) => setTimePart(hour, next))}</div>
     </GlassSurface>, portal) : null}
   </>;
 }
