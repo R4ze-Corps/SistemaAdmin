@@ -104,8 +104,11 @@ html.dark .selected-booking-eyebrow { color: #a8b8ae !important; }
 .selected-booking-title { margin: .25rem 0 0 !important; color: inherit !important; font-size: .875rem !important; font-weight: 700 !important; }
 .selected-booking-content { color: inherit !important; font-size: 10px !important; }
 
-.matto-admin-bar { position: relative; display: grid; grid-template-columns: minmax(195px, auto) auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 76px; padding: 8px 20px; border-bottom: 1px solid rgba(228, 227, 220, .3); background: var(--background); color: var(--foreground); }
+.matto-admin-bar { position: relative; display: grid; grid-template-columns: minmax(195px, 1fr) auto auto; align-items: center; gap: 10px; min-height: 76px; padding: 8px 20px; border-bottom: 1px solid rgba(228, 227, 220, .3); background: var(--background); color: var(--foreground); }
 .matto-dashboard-brand-slot, .matto-dashboard-tabs-slot, .matto-dashboard-actions-slot { min-width: 0; }
+.matto-dashboard-brand-slot { grid-column: 1; }
+.matto-auth-links { grid-column: 2; }
+.matto-dashboard-actions-slot { grid-column: 3; }
 @media (min-width: 1051px) { .matto-dashboard-tabs-slot { position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%, -50%); } }
 .matto-dashboard-brand { display: flex; align-items: center; gap: 12px; min-width: 195px; }
 .matto-dashboard-tabs { display: flex; align-items: center; }
