@@ -29,7 +29,7 @@ export default function GlassSelectMenu({
   const listboxId = `glass-select-${useId().replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(Math.max(0, options.findIndex(option => option.value === value)));
-  const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number; strategy: "fixed" | "absolute" }>({ left: 8, top: 8, width: 220, maxHeight: 240, strategy: "fixed" });
+  const [position, setPosition] = useState<{ left: number; top: number; width: number; maxHeight: number }>({ left: 8, top: 8, width: 220, maxHeight: 240 });
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   const selected = options.find(option => option.value === value);
 
@@ -37,20 +37,18 @@ export default function GlassSelectMenu({
     if (inlineMenu) return;
     const rect = trigger.current?.getBoundingClientRect();
     if (!rect) return;
-    const dialog = trigger.current?.closest("dialog");
-    const dialogRect = dialog?.getBoundingClientRect();
-    const scale = dialog && dialog.offsetWidth ? (dialogRect?.width ?? dialog.offsetWidth) / dialog.offsetWidth : 1;
-    const width = Math.min(rect.width / scale, (dialog?.clientWidth ?? window.innerWidth) - 16);
-    const localLeft = (rect.left - (dialogRect?.left ?? 0)) / scale + (dialog?.scrollLeft ?? 0);
-    const left = Math.max(8, Math.min(localLeft, (dialog?.clientWidth ?? window.innerWidth) - width - 8));
-    const localTop = (rect.bottom - (dialogRect?.top ?? 0)) / scale + (dialog?.scrollTop ?? 0) + 2;
-    const top = localTop;
-    const visibleBelow = Math.min(window.innerHeight - rect.bottom - 10, dialogRect ? dialogRect.bottom - rect.bottom - 10 : Infinity) / scale;
-    const maxHeight = Math.max(40, Math.min(240, visibleBelow));
-    setPosition({ left, top, width, maxHeight, strategy: dialog ? "absolute" : "fixed" });
+    const zoom = Number.parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    const viewportWidth = window.innerWidth / zoom;
+    const viewportHeight = window.innerHeight / zoom;
+    const width = Math.min(rect.width / zoom, viewportWidth - 16);
+    const left = Math.max(8, Math.min(rect.left / zoom, viewportWidth - width - 8));
+    const top = rect.bottom / zoom + 2;
+    const visibleBelow = Math.max(40, viewportHeight - top - 8);
+    const maxHeight = Math.min(240, visibleBelow);
+    setPosition({ left, top, width, maxHeight });
   }, [inlineMenu]);
 
-  useEffect(() => { setPortal(open ? trigger.current?.closest("dialog") ?? document.body : null); }, [open]);
+  useEffect(() => { setPortal(open ? document.body : null); }, [open]);
   useEffect(() => {
     if (!open || !portal) return;
     const schedulePlace = () => requestAnimationFrame(place);
@@ -104,7 +102,7 @@ export default function GlassSelectMenu({
     requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-option-index="${next}"]`)?.focus());
   };
 
-  const popup = open ? <GlassSurface ref={panel} id={listboxId} role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className={`${inlineMenu ? "absolute left-0 top-[calc(100%+2px)] w-full" : "fixed"} glass-select-popup z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]`} contentClassName="max-h-[min(15rem,calc(100dvh-16px))] overflow-y-auto p-1.5" style={inlineMenu ? { position: "absolute", zIndex: 100, left: 0, top: "calc(100% + 2px)", width: "100%", maxHeight: 240 } : { position: position.strategy, zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
+  const popup = open ? <GlassSurface ref={panel} id={listboxId} role="listbox" aria-label={ariaLabel} onKeyDown={onListKeyDown} className={`${inlineMenu ? "absolute left-0 top-[calc(100%+2px)] w-full" : "fixed"} glass-select-popup z-[100] overflow-hidden border border-white/20 text-[#f4fafb] shadow-[0_18px_50px_rgba(0,0,0,.35)]`} contentClassName="max-h-[min(15rem,calc(100dvh-16px))] overflow-y-auto p-1.5" style={inlineMenu ? { position: "absolute", zIndex: 100, left: 0, top: "calc(100% + 2px)", width: "100%", maxHeight: 240 } : { position: "fixed", zIndex: 100, left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }} tint={0.24} blur={18} saturation={1.65} radius={12} specular>
       {options.map((option, index) => {
         const isSelected = option.value === value;
         const isActive = index === activeIndex;
