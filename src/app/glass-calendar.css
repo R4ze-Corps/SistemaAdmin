@@ -35,7 +35,7 @@
 .glass-calendar-schedule .glass-calendar-day-button[data-selected-single="true"]:is(:hover, :focus-visible) { z-index: 30; }
 .glass-calendar-schedule .glass-calendar-outside .glass-calendar-day-button { color: #708077; border-color: rgba(94,143,112,.2); background: rgba(16,28,22,.32); }
 .glass-calendar-schedule .glass-calendar-day-button:focus-visible { z-index: 30; outline-offset: 1px; }
-.glass-schedule-day-content { position: relative; display: flex; min-height: 100%; flex-direction: column; align-items: flex-start; gap: .25rem; }
+.glass-schedule-day-content { position: relative; display: flex; width: 100%; min-height: 100%; flex-direction: column; align-items: flex-start; gap: .25rem; }
 .glass-schedule-day-number { font-weight: 700; }
 .glass-schedule-day-dots { position: absolute; top: .1rem; right: .1rem; display: flex; gap: .2rem; }
 .glass-schedule-day-dots i { width: .38rem; height: .38rem; border-radius: 999px; }
