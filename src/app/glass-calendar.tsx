@@ -142,9 +142,9 @@ export function GlassDatePicker({ label, value, onChange, className = "" }: { la
     <button ref={trigger} type="button" className={`glass-calendar-trigger ${className}`} aria-label={`${label}: ${displayValue}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setMonth(value ? fromISO(value) : new Date()); place(); setOpen(current => !current); }}>
       <span>{displayValue}</span><CalendarDays size={16} aria-hidden="true" />
     </button>
-    {open && <div ref={panel} role="dialog" aria-label={`Calendário: ${label}`} className="glass-calendar-popover absolute z-[120]" style={{ position: "absolute", left: 0, top: "calc(100% + 8px)", width: position.width, maxHeight: position.maxHeight }}>
+    {open && createPortal(<div ref={panel} role="dialog" aria-label={`Calendário: ${label}`} className="glass-calendar-popover glass-date-popover" style={{ position: "fixed", left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }}>
       <GlassCalendar month={month} onMonthChange={setMonth} selected={selected} onSelect={date => { onChange(toISO(date)); setMonth(new Date(date.getFullYear(), date.getMonth(), 1)); setOpen(false); trigger.current?.focus(); }} />
-    </div>}
+    </div>, document.body)}
   </div>;
 }
 
