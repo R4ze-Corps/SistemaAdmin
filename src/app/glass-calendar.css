@@ -39,10 +39,9 @@
 .glass-schedule-day-number { font-weight: 700; }
 .glass-schedule-day-dots { position: absolute; top: .1rem; right: .1rem; display: flex; gap: .2rem; }
 .glass-schedule-day-dots i { width: .38rem; height: .38rem; border-radius: 999px; }
-.glass-calendar-schedule .calendar-reservation-preview { top: calc(100% + .25rem); left: 0; width: max-content; min-width: 9rem; max-width: min(14rem, calc(100vw - 1.5rem)); padding: .4rem; }
-.glass-calendar-schedule .calendar-reservation-preview { pointer-events: auto; }
+.glass-calendar-schedule .calendar-reservation-preview { position: absolute; z-index: 40; top: calc(100% + .25rem); left: 0; display: grid; gap: .25rem; width: max-content; min-width: 9rem; max-width: min(14rem, calc(100vw - 1.5rem)); padding: .4rem; border: 1px solid rgba(255,255,255,.2); border-radius: .7rem; background: rgba(20,35,28,.9); box-shadow: 0 12px 28px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.1); -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%); opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-.25rem); transition: opacity .15s ease, visibility .15s ease, transform .15s ease; }
 .glass-calendar-schedule .glass-calendar-day-button[data-calendar-column="5"] .calendar-reservation-preview, .glass-calendar-schedule .glass-calendar-day-button[data-calendar-column="6"] .calendar-reservation-preview { left: auto; right: 0; }
-.glass-calendar-schedule .glass-calendar-day-button:hover .calendar-reservation-preview, .glass-calendar-schedule .glass-calendar-day-button:focus-visible .calendar-reservation-preview { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+.glass-calendar-schedule .glass-calendar-day-button:hover .calendar-reservation-preview, .glass-calendar-schedule .glass-calendar-day-button:focus-visible .calendar-reservation-preview { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0); transition-delay: 0s; }
 .glass-calendar-schedule .calendar-reservation-preview-item { padding: .35rem .5rem; border: 1px solid rgba(255,255,255,.12); font-size: .68rem; }
 .glass-calendar-schedule .calendar-reservation-preview-more { color: #b6c8bc; background: rgba(255,255,255,.08); }
 .glass-month-trigger { justify-content: flex-start; }
