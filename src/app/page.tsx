@@ -233,7 +233,7 @@ function Dashboard() {
   const renameCabin = (id: string, name: string) => { if (!name.trim()) return; setCabins((items) => items.map((item) => item.id === id ? { ...item, name: name.trim() } : item)); };
   const canManageAccounts = headerSlots.actions?.dataset.canManageAccounts === "true";
 
-  if (natureOpen) return <NatureAgenda onBack={() => setNatureOpen(false)} onCalendar={() => { setNatureOpen(false); setView(new Date()); setSelectedDay(toISO(new Date())); setActiveView("overview"); }} />;
+  if (natureOpen) return <NatureAgenda cabins={cabins} bookings={bookings} today={today} onBack={() => setNatureOpen(false)} onCalendar={day => { setNatureOpen(false); setView(fromISO(day)); setSelectedDay(day); setActiveView("overview"); }} />;
   return <BetaFeedbackContext.Provider value={{ message: beta ? notice : "", dismiss: () => setNotice("") }}><main className="min-h-screen bg-[#fffefa] text-[#22322b]"><section className="min-h-screen w-full overflow-hidden bg-[#fffefa]">
 
     {activeView !== "launcher" && headerSlots.tabs && createPortal(<div className="matto-dashboard-tabs"><GlassTabs tint={0} value={activeView === "finance" ? "finance" : "launcher"} onValueChange={next => setActiveView(next)} label="Seções administrativas" options={[{ value: "launcher", label: "Home", icon: <LayoutDashboard size={13} /> }, { value: "finance", label: "Financeiro", icon: <WalletCards size={13} /> }]} /></div>, headerSlots.tabs)}
