@@ -54,22 +54,28 @@ const chalets = [
 export default function ChaletAgenda({today, cabins, bookings, ready, onBack}: Props) {
   const [day, setDay] = useState(today);
   const [selected, setSelected] = useState<typeof chalets[number] | null>(null);
+  const [agendaOpen, setAgendaOpen] = useState(false);
+  function openAgenda() {
+    setAgendaOpen(true);
+    window.scrollTo(0, 0);
+  }
   const [photo, setPhoto] = useState(0);
   const unit = selected && cabins.find(c => c.name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/\W+/).includes(selected.key));
   const stays = selected ? bookings.filter(b => b.cabinId === unit?.id) : bookings;
   const occupied = stays.some(b => b.start <= day && day < b.end);
 
   function showChalet(next: typeof selected) {
+    setAgendaOpen(false);
     setSelected(next);
     setPhoto(0);
     window.scrollTo(0, 0);
   }
   return <main className="chalet-agenda">
     <Glass as="header" className="escape-nav-lens" contentClassName="escape-nav" radius={24} strength={0.5} blur={4} tint={0.45} tintColor="255,252,244" dome={0.1}>
-      <button className="stay-brand" onClick={onBack} aria-label="Matto Chalés — voltar à tela inicial"><House/> Matto Chalés</button>
+      <button className="stay-brand" onClick={onBack} aria-label="Matto Chalés — voltar à tela inicial"><img src="/assets/chale-verde-pinho.webp" width={32} height={32} alt="" className="rounded-full"/> Matto Chalés</button>
       <nav aria-label="Navegação dos chalés">
-        {selected ? <button onClick={() => showChalet(null)}><ArrowLeft size={15}/> Chalés</button> : <a href="#chales">Chalés</a>}
-        <a href="#agenda">{selected ? "Disponibilidade" : "Agenda"}</a>
+        {selected || agendaOpen ? <button onClick={() => showChalet(null)}><ArrowLeft size={15}/> Chalés</button> : <a href="#chales">Chalés</a>}
+        {selected ? <a href="#agenda">Disponibilidade</a> : !agendaOpen && <button onClick={openAgenda}>Agenda</button>}
       </nav>
     </Glass>
     {selected ? <section className="stay-detail" key={selected.key}>
@@ -78,21 +84,25 @@ export default function ChaletAgenda({today, cabins, bookings, ready, onBack}: P
       <figure><img src={selected.gallery[photo]} alt={photo === 0 ? "Representação ilustrativa do " + selected.name : "Paisagem ilustrativa da galeria"}/>
         <figcaption>Galeria ilustrativa · {photo+1} de {selected.gallery.length}</figcaption></figure>
       <div className="stay-thumbs">{selected.gallery.map((src,i) => <button key={src} onClick={() => setPhoto(i)} aria-label={"Ver imagem "+(i+1)} aria-pressed={photo===i}><img src={src} alt=""/></button>)}</div>
-    </section> : <>
+    </section> : !agendaOpen && <>
       <section id="estadia" className="escape-hero"><div className="escape-copy"><small>HOSPEDAGEM EM CHALÉS</small><h1>Encontre seu<br/><em>refúgio.</em></h1><p>Escolha entre o Manacá e o Ipê para sua próxima estadia.</p><a href="#chales">Explorar chalés <ArrowRight size={17}/></a></div></section>
       <div className="escape-ribbon"><span><House/> Dois chalés</span><span><BedDouble/> Aluguel por diária</span><span><CalendarDays/> Agenda de reservas</span></div>
-      <section className="escape-units" id="chales"><header><h2>Nossos chalés <Leaf size={20}/></h2><a href="#agenda">Ver agenda <ArrowRight size={15}/></a></header>
+      <section className="escape-units" id="chales"><header><h2>Nossos chalés <Leaf size={20}/></h2><button type="button" onClick={openAgenda} style={{padding:0,background:"transparent"}} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#316643]">
+          <Glass as="span" radius={24} strength={0.5} blur={4} tint={0.3} dome={0.1} tintColor="175,204,181" className="block border border-[#acc3b3] transition-colors hover:bg-[#dde9df]" contentClassName="z-10 flex min-h-11 items-center gap-2 px-4 font-semibold text-[#213e30]">
+            Ver agenda <ArrowRight size={15} aria-hidden="true"/>
+          </Glass>
+        </button></header>
         <div>{chalets.map(c => <article key={c.key} style={{backgroundImage:"linear-gradient(0deg,#0c241fef,transparent 80%),url("+c.gallery[0]+")"}}>
           <small>ALUGUEL POR DIÁRIA</small><h3>{c.name}</h3>
           <button onClick={() => showChalet(c)} aria-label={"Mais detalhes sobre o "+c.name}>Mais Detalhes <ArrowRight size={16}/></button>
         </article>)}</div>
       </section>
     </>}
-    <section className="chalet-content" id="agenda" aria-label="Disponibilidade por data">
+    {(selected || agendaOpen) && <section style={agendaOpen ? {paddingTop:100} : undefined} className="chalet-content" id="agenda" aria-label="Disponibilidade por data">
       {ready && (!selected || unit) ? <>
         <ReservationMonth day={day} today={today} bookings={stays} select={setDay}/>
         {selected && <p aria-live="polite">{formatDay(day)} · {occupied ? "Noite ocupada" : "Noite disponível"}</p>}
       </> : <p>{ready ? "Este chalé ainda não está vinculado à agenda de reservas." : "Carregando agenda…"}</p>}
-    </section>
+    </section>}
   </main>;
 }
