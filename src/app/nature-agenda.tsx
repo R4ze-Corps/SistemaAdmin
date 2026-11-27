@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Leaf, BedDouble, CalendarDays, ChevronLeft, ChevronRight, House } from "lucide-react";
+import { dotClass, type CabinTone } from "./cabin-tone";
 import { Glass } from "@/components/ui/glass";
 
 import "./nature-agenda.css";
@@ -11,13 +12,13 @@ type Stay = {
   start: string; end: string; checkIn: string; checkOut: string; status: string;
 };
 type Props = {
-  today: string; cabins: {id: string; name: string}[]; bookings: Stay[];
+  today: string; cabins: {id: string; name: string; tone: CabinTone}[]; bookings: Stay[];
   ready: boolean; onBack: () => void;
 };
 const formatDay = (day: string) => new Date(day + "T12:00:00").toLocaleDateString("pt-BR", {weekday:"long", day:"numeric", month:"long"});
 
-function ReservationMonth({ day, today, bookings, select }: {
-  day: string; today: string; bookings: Stay[]; select: (day: string) => void;
+function ReservationMonth({ day, today, bookings, cabins, select }: {
+  day: string; today: string; bookings: Stay[]; cabins: Props["cabins"]; select: (day: string) => void;
 }) {
   const [year, month] = day.split("-").map(Number);
   const monthStart = new Date(Date.UTC(year, month - 1, 1));
@@ -35,10 +36,13 @@ function ReservationMonth({ day, today, bookings, select }: {
       {Array.from({length: monthStart.getUTCDay()}, (_, i) => <span key={"blank"+i}/>)}
       {Array.from({length: days}, (_, i) => {
         const date = day.slice(0,8) + String(i+1).padStart(2,"0");
-        const count = bookings.filter(b => b.start <= date && date < b.end).length;
+        const active = bookings.filter(b => b.start <= date && date < b.end);
+        const count = active.length;
+        const units = cabins.filter(c => active.some(b => b.cabinId === c.id));
         const label = count === 1 ? "1 reserva" : count + " reservas";
-        return <button key={date} onClick={() => select(date)} aria-pressed={day === date}
-          aria-current={date === today ? "date" : undefined} aria-label={formatDay(date) + ", " + label}>
+        return <button className="relative" key={date} onClick={() => select(date)} aria-pressed={day === date}
+          aria-current={date === today ? "date" : undefined} aria-label={[formatDay(date), label, ...units.map(c => c.name)].join(", ")}>
+          <span aria-hidden="true" className="absolute right-1.5 top-1.5 flex gap-1">{units.map(c => <b key={c.id} title={c.name} className={"size-1.5 rounded-full " + dotClass(c.tone)}/>)}</span>
           <strong>{i+1}</strong>{count > 0 && <span>{count}<i>{count === 1 ? " reserva" : " reservas"}</i></span>}
         </button>;
       })}
@@ -100,7 +104,7 @@ export default function ChaletAgenda({today, cabins, bookings, ready, onBack}: P
     </>}
     {(selected || agendaOpen) && <section style={agendaOpen ? {paddingTop:100} : undefined} className="chalet-content" id="agenda" aria-label="Disponibilidade por data">
       {ready && (!selected || unit) ? <>
-        <ReservationMonth day={day} today={today} bookings={stays} select={setDay}/>
+        <ReservationMonth day={day} today={today} bookings={stays} cabins={cabins} select={setDay}/>
         {selected && <p aria-live="polite">{formatDay(day)} · {occupied ? "Noite ocupada" : "Noite disponível"}</p>}
       </> : <p>{ready ? "Este chalé ainda não está vinculado à agenda de reservas." : "Carregando agenda…"}</p>}
     </section>}

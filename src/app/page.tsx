@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { upload } from "@vercel/blob/client";
+import { dotClass, type CabinTone } from "./cabin-tone";
 import NatureAgenda from "./nature-agenda";
 import FinancePanel, { type FinanceEntry } from "./finance-panel";
 import { type Payable } from "./payables-panel";
@@ -22,7 +23,7 @@ import "./glass-switch.css";
 import { useWorkspace } from "./workspace-context";
 import { ArrowRight, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, Coffee, Dog, Download, Ellipsis, FileText, LayoutDashboard, LogIn, LogOut, Moon, Paperclip, PartyPopper, Pencil, Plus, Save, Settings, Settings2, Trash2, Sun, TreePalm, Upload, Users, WalletCards, Wine, X, Boxes } from "lucide-react";
 
-type Cabin = { id: string; name: string; tone: "emerald" | "amber" | "violet" | "rose" };
+type Cabin = { id: string; name: string; tone: CabinTone };
 type Attachment = { id: string; name: string; type: string; size: number; pathname?: string; url?: string; data?: string };
 type BookingStatus = "Reservado" | "Check-in realizado" | "Finalizada";
 type Booking = { id: string; cabinId: string; guestName: string; people: number; start: string; end: string; checkIn: string; checkOut: string; pets: boolean; breakfast: boolean; intolerance: string; decoration: boolean; notes: string; documents: Attachment[]; status: BookingStatus; createdAt: string };
@@ -41,7 +42,7 @@ const formatSize = (bytes: number) => bytes < 1024 * 1024 ? `${Math.max(1, Math.
 
 function makeDraft(day: string, cabins: Cabin[]): Draft { return { cabinId: cabins[0]?.id ?? "", guestName: "", people: 2, start: day, end: nextDay(day), checkIn: "14:00", checkOut: "11:00", pets: false, breakfast: true, intolerance: "", decoration: false, notes: "", documents: [], status: "Reservado" }; }
 function toneClasses(tone: Cabin["tone"]) { return tone === "amber" ? "bg-[#f3e9da] text-[#906a36] border-[#e5d1af]" : tone === "violet" ? "bg-[#ece8f6] text-[#665297] border-[#d9cff0]" : tone === "rose" ? "bg-[#f7e5df] text-[#995545] border-[#edcdc4]" : "bg-[#e5efe9] text-[#347053] border-[#c9dfd0]"; }
-function dotClass(tone: Cabin["tone"]) { return tone === "amber" ? "bg-[#c89e66]" : tone === "violet" ? "bg-[#8877bb]" : tone === "rose" ? "bg-[#c47b68]" : "bg-[#68a07d]"; }
+
 
 export default function Home() {
   return <AuthGate><Dashboard /></AuthGate>;
