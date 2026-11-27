@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Search, MapPin, Leaf, BedDouble, CalendarDays, ChevronLeft, ChevronRight, DoorClosed, DoorOpen, House, Users } from "lucide-react";
+import { Glass } from "@/components/ui/glass";
 import { GlassDatePicker } from "./glass-calendar";
 import "./nature-agenda.css";
 
@@ -66,8 +67,9 @@ export default function ChaletAgenda({today, cabins, bookings, ready, onReserve,
     setDay(date.toISOString().slice(0,10));
   }
   return <main className="chalet-agenda">
-    <header className="escape-nav"><a href="#estadia"><House/> Matto Chalés</a><nav><a href="#chalés">Chalés</a><a href="#disponibilidade">Disponibilidade</a><a href="#agenda">Agenda</a></nav><button onClick={onBack}><ArrowLeft size={17}/> Painel</button></header>
-    <section id="estadia" className="escape-hero"><div className="escape-copy"><small>HOSPEDAGEM EM CHALÉS</small><h1>Encontre seu<br/><em>refúgio.</em></h1><p>Escolha entre o Manacá e o Ipê para sua próxima estadia.</p><a href="#chalés">Explorar chalés <ArrowRight size={17}/></a></div>
+    <section id="estadia" className="escape-hero">
+      <Glass as="header" className="escape-nav-lens" contentClassName="escape-nav" radius={24} strength={0.5} blur={4} tint={0.45} tintColor="255,252,244" dome={0.1}><a href="#estadia"><House/> Matto Chalés</a><nav><a href="#chalés">Chalés</a><a href="#disponibilidade">Disponibilidade</a><a href="#agenda">Agenda</a></nav><button onClick={onBack}><ArrowLeft size={17}/> Painel</button></Glass>
+    <div className="escape-copy"><small>HOSPEDAGEM EM CHALÉS</small><h1>Encontre seu<br/><em>refúgio.</em></h1><p>Escolha entre o Manacá e o Ipê para sua próxima estadia.</p><a href="#chalés">Explorar chalés <ArrowRight size={17}/></a></div>
       <form id="disponibilidade" className="escape-search" onSubmit={e => {e.preventDefault(); setSearched(true); if(valid) document.getElementById("chalés")?.scrollIntoView({block:"start"});}}>
         <label><span><MapPin/> Onde ficar</span><select value={choice} onChange={e=>setChoice(e.target.value)}><option value="">Todos os chalés</option>{options.map(o=><option key={o.key} value={o.key}>{o.name}</option>)}</select></label>
         <div><span><CalendarDays/> Entrada</span><GlassDatePicker label="Entrada" value={arrival} onChange={setArrival}/></div>
