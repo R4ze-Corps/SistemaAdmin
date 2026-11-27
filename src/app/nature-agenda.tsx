@@ -1,4 +1,5 @@
 "use client";
+import { stayHours } from "./stay-defaults";
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Leaf, BedDouble, CalendarDays, ChevronLeft, ChevronRight, House } from "lucide-react";
@@ -31,6 +32,12 @@ function ReservationMonth({ day, today, bookings, cabins, select }: {
     <header><h2>{monthLabel}</h2><div><button onClick={() => select(today)}>Hoje</button>
       <button aria-label="Mês anterior" onClick={() => changeMonth(-1)}><ChevronLeft/></button>
       <button aria-label="Próximo mês" onClick={() => changeMonth(1)}><ChevronRight/></button></div></header>
+    {cabins.length > 0 && <ul aria-label="Legenda dos chalés" className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+      {cabins.map(cabin => <li key={cabin.id} className="inline-flex items-center gap-2">
+        <span aria-hidden="true" className={"size-2.5 shrink-0 rounded-full " + dotClass(cabin.tone)}/>
+        {cabin.name}
+      </li>)}
+    </ul>}
     <div className="stay-days">
       {["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].map(d => <small key={d}>{d}</small>)}
       {Array.from({length: monthStart.getUTCDay()}, (_, i) => <span key={"blank"+i}/>)}
@@ -88,6 +95,15 @@ export default function ChaletAgenda({today, cabins, bookings, ready, onBack}: P
       <figure><img src={selected.gallery[photo]} alt={photo === 0 ? "Representação ilustrativa do " + selected.name : "Paisagem ilustrativa da galeria"}/>
         <figcaption>Galeria ilustrativa · {photo+1} de {selected.gallery.length}</figcaption></figure>
       <div className="stay-thumbs">{selected.gallery.map((src,i) => <button key={src} onClick={() => setPhoto(i)} aria-label={"Ver imagem "+(i+1)} aria-pressed={photo===i}><img src={src} alt=""/></button>)}</div>
+      <section className="stay-facts" aria-labelledby="stay-facts-title">
+        <h2 id="stay-facts-title">Sobre o {selected.name}</h2>
+        <dl>
+          <div><dt>Hospedagem</dt><dd>Aluguel por diária</dd></div>
+          <div><dt>Entrada padrão</dt><dd>{stayHours.checkIn}</dd></div>
+          <div><dt>Saída padrão</dt><dd>{stayHours.checkOut}</dd></div>
+        </dl>
+        <p>Confira os horários da sua reserva. Café da manhã, pets e decoração são registrados individualmente para cada estadia.</p>
+      </section>
     </section> : !agendaOpen && <>
       <section id="estadia" className="escape-hero"><div className="escape-copy"><small>HOSPEDAGEM EM CHALÉS</small><h1>Encontre seu<br/><em>refúgio.</em></h1><p>Escolha entre o Manacá e o Ipê para sua próxima estadia.</p><a href="#chales">Explorar chalés <ArrowRight size={17}/></a></div></section>
       <div className="escape-ribbon"><span><House/> Dois chalés</span><span><BedDouble/> Aluguel por diária</span><span><CalendarDays/> Agenda de reservas</span></div>
@@ -104,7 +120,7 @@ export default function ChaletAgenda({today, cabins, bookings, ready, onBack}: P
     </>}
     {(selected || agendaOpen) && <section style={agendaOpen ? {paddingTop:100} : undefined} className="chalet-content" id="agenda" aria-label="Disponibilidade por data">
       {ready && (!selected || unit) ? <>
-        <ReservationMonth day={day} today={today} bookings={stays} cabins={cabins} select={setDay}/>
+        <ReservationMonth day={day} today={today} bookings={stays} cabins={unit ? [unit] : cabins} select={setDay}/>
         {selected && <p aria-live="polite">{formatDay(day)} · {occupied ? "Noite ocupada" : "Noite disponível"}</p>}
       </> : <p>{ready ? "Este chalé ainda não está vinculado à agenda de reservas." : "Carregando agenda…"}</p>}
     </section>}

@@ -1,4 +1,5 @@
 "use client";
+import { stayHours } from "./stay-defaults";
 
 import { ChangeEvent, FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -40,7 +41,7 @@ const shortDate = (value: string) => fromISO(value).toLocaleDateString("pt-BR", 
 const rangeIncludes = (booking: Booking, value: string) => booking.start <= value && booking.end > value;
 const formatSize = (bytes: number) => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
-function makeDraft(day: string, cabins: Cabin[]): Draft { return { cabinId: cabins[0]?.id ?? "", guestName: "", people: 2, start: day, end: nextDay(day), checkIn: "14:00", checkOut: "11:00", pets: false, breakfast: true, intolerance: "", decoration: false, notes: "", documents: [], status: "Reservado" }; }
+function makeDraft(day: string, cabins: Cabin[]): Draft { return { cabinId: cabins[0]?.id ?? "", guestName: "", people: 2, start: day, end: nextDay(day), ...stayHours, pets: false, breakfast: true, intolerance: "", decoration: false, notes: "", documents: [], status: "Reservado" }; }
 function toneClasses(tone: Cabin["tone"]) { return tone === "amber" ? "bg-[#f3e9da] text-[#906a36] border-[#e5d1af]" : tone === "violet" ? "bg-[#ece8f6] text-[#665297] border-[#d9cff0]" : tone === "rose" ? "bg-[#f7e5df] text-[#995545] border-[#edcdc4]" : "bg-[#e5efe9] text-[#347053] border-[#c9dfd0]"; }
 
 
