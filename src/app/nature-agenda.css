@@ -20,7 +20,7 @@ body:has(.chalet-agenda) .matto-admin-bar{display:none}
 .stay-days button span{font-size:12px}.stay-days i{font-style:normal}.stay-days small{color:#506053}
 @media(max-width:540px){.stay-days{gap:3px}.stay-days button{padding:4px;min-height:48px}.stay-days i{display:none}}
 .escape-nav,.escape-units header,.escape-ribbon,.escape-footer,.escape-search,.escape-nav nav{display:flex;align-items:center}
-.escape-hero .escape-nav-lens{position:absolute;inset:12px clamp(12px,3vw,48px) auto;z-index:3;background:rgba(250,249,246,.45)}
+.chalet-agenda .escape-nav-lens{position:fixed;inset:12px clamp(12px,3vw,48px) auto;z-index:30;background:rgba(250,249,246,.45)}
 .escape-nav{position:relative;z-index:1;justify-content:space-between;padding:12px clamp(14px,3vw,48px);color:#15332a}
 .escape-hero .escape-copy{margin-top:64px}
 .escape-nav a,.escape-nav button,.escape-copy a,.escape-search span,.escape-search>button,.escape-ribbon span,.escape-units h2,.escape-units a,.escape-units button{display:inline-flex;align-items:center;gap:9px}
@@ -32,3 +32,10 @@ body:has(.chalet-agenda) .matto-admin-bar{display:none}
 .escape-ribbon{position:relative;justify-content:space-evenly;gap:12px;flex-wrap:wrap;margin:-24px auto 0;width:min(90%,950px);background:#fffefa;color:#384e3d;border-radius:18px;padding:22px;box-shadow:0 8px 25px #1939280b}.escape-ribbon svg{color:#697f56}
 .escape-units{padding:48px clamp(20px,7vw,130px) 0}.escape-units header{justify-content:space-between;margin-bottom:16px}.escape-units h2{font-size:clamp(24px,3vw,38px);font-weight:650;letter-spacing:-.045em}.escape-units header a{font-size:14px}.escape-units>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.escape-units article{background-size:cover;background-position:center;border-radius:18px;color:#fff;min-height:290px;display:flex;align-items:start;justify-content:end;flex-direction:column;padding:24px}.escape-units h3{font-size:30px;font-weight:650}.escape-units article p{font-size:15px}.escape-units button{background:#fff8e9;color:#25442e;margin-top:12px}.escape-units button:disabled{opacity:.6;cursor:default}.escape-footer{padding:28px 7%;gap:10px;background:#17382a;color:white}.escape-footer button{margin-left:auto}
 @media(max-width:680px){.escape-nav nav{display:none}.escape-hero{padding:40px 5% 55px;background-image:linear-gradient(95deg,#faf9f5ec,#faf9f55c),url(/nature/lake.jpg)}.escape-search{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px}.escape-search>label,.escape-search>div{border:0}.escape-search>button{grid-column:1/-1;justify-content:center}.escape-ribbon{font-size:12px;padding:13px}.escape-ribbon svg{width:16px}.escape-units{padding-top:32px}.escape-units>div{grid-template-columns:1fr}.escape-units article{min-height:240px}}
+
+.chalet-agenda [id]{scroll-margin-top:96px}
+.escape-nav .stay-brand{font-size:20px;font-weight:800;border:0;padding:0}.stay-brand svg{background:#f49132;color:white;box-sizing:content-box;padding:6px;border-radius:50%}
+.stay-detail{padding:110px clamp(20px,7vw,130px) 0}.stay-detail h1{font-size:clamp(40px,6vw,82px);line-height:1.12;letter-spacing:-.055em}.stay-detail small{font-size:12px;letter-spacing:.14em}.stay-detail p{margin:10px 0 22px}
+.stay-detail figure{position:relative}.stay-detail figure img{width:100%;height:clamp(230px,52vh,600px);object-fit:cover;border-radius:18px}.stay-detail figcaption{position:absolute;bottom:12px;left:12px;background:#16271de6;color:white;padding:5px 10px;border-radius:8px;font-size:13px}
+.stay-thumbs{display:flex;gap:10px;margin-top:12px}.stay-thumbs button{border:2px solid transparent;border-radius:10px;padding:2px}.stay-thumbs button[aria-pressed=true]{border-color:#316643}.stay-thumbs img{width:80px;height:54px;object-fit:cover;border-radius:6px}
+@media(max-width:680px){.escape-nav nav{display:flex;gap:8px;font-size:12px}.escape-nav .stay-brand{font-size:16px}.escape-nav nav button{padding:4px 6px}}
